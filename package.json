@@ -1,0 +1,17 @@
+{
+  "name": "resit-ryk-functions",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "start": "func start",
+    "seed": "node ./src/database/seed",
+    "test": "echo \"No tests yet...\""
+  },
+  "dependencies": {
+    "@azure/service-bus": "^7.9.0",
+    "axios": "^1.4.0",
+    "fs": "^0.0.1-security",
+    "moment-timezone": "^0.5.43",
+    "mongodb": "^5.7.0"
+  }
+}
