@@ -7,7 +7,7 @@ function createBusSender() {
 }
 
 exports.scheduleMessage = async function(serviceBusMessage, scheduledEnqueueTimeUtc) {
-    console.log("[BUS] SendMessage", serviceBusMessage)
+    console.log("[BUS] SendMessage", scheduledEnqueueTimeUtc, serviceBusMessage)
     const { sbClient, sender } = createBusSender()
     try {
         const scheduledMessage = await sender.scheduleMessages(serviceBusMessage, scheduledEnqueueTimeUtc)

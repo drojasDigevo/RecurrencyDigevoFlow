@@ -1,5 +1,5 @@
 const client = require("../database/mongodb")
-const { insertOne, verifyIndexExists } = require("../utils/mongodb")
+const { insertOne, verifyCreateIndex } = require("../utils/mongodb")
 const { createEvent, EventType } = require("./events")
 const { verifySubscriptionStatus } = require("./subscriptions")
 const { APICreateShipment } = require("../api/shipments")
@@ -17,26 +17,25 @@ async function createShipment (data) {
     return { _id: insertedId}
 }
 
-async function listShipmentsBySubscription (subscriptionId) {
-    const indexExists = await verifyIndexExists('delivery_date')
-    if (!indexExists) collection.createIndex({ 'delivery_date': 1 })
-    const result = await collection.find({ subscriptionId }).sort({ delivery_date: 1 }).toArray()
+async function listShipmentsBySubscription (idSubscription) {
+    await verifyCreateIndex(COLLECTION, 'delivery_date')
+    const result = await collection.find({ idSubscription }).sort({ delivery_date: 1 }).toArray()
     return result
 }
 
-exports.createShipmentBySubscription = async function (subscriptionId) {
+exports.createShipmentBySubscription = async function (idSubscription) {
     try {
-        const subscription = await verifySubscriptionStatus(subscriptionId)
+        const subscription = await verifySubscriptionStatus(idSubscription)
         if (subscription) {
-            const shipment = await APICreateShipment(subscriptionId)
+            const shipment = await APICreateShipment(idSubscription)
             if (shipment) {
-                await postAPISubscriptionChange(subscriptionId, ShipmentStatus.SHIPMENT_CREATED)
+                await postAPISubscriptionChange(idSubscription, ShipmentStatus.SHIPMENT_CREATED)
 
-                await createShipment({...shipment, subscriptionId})
-                const shipments = await listShipmentsBySubscription(subscriptionId)
+                await createShipment({...shipment, idSubscription})
+                const shipments = await listShipmentsBySubscription(idSubscription)
                 // FIX: API deberia devolver si existen mas envios? ahora se esta tomando "frequency" de la subscripcion
                 if (subscription.frequency != shipments.length) {
-                    await createEvent(EventType.SHIPMENT_DISPATCHED, { subscriptionId }, shipment.delivery_date)
+                    await createEvent(EventType.SHIPMENT_DISPATCHED, { idSubscription }, shipment.delivery_date)
                 }
             } else {
                 //TODO notificar error

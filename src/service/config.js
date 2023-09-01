@@ -23,6 +23,6 @@ exports.getConfigByCode = async function (code) {
 }
 
 exports.updateConfigByCode = async function (code, newValue) {
-    const response = await updateOneFilter(COLLECTION, { code }, { value: newValue })
-    return response
+    const { modifiedCount } = await updateOneFilter(COLLECTION, { code }, { value: newValue })
+    return modifiedCount === 1
 }

@@ -42,13 +42,37 @@ exports.updateManyFilter = async function (COLLECTION, filter, newData) {
     }
 }
 
-exports.verifyIndexExists = async function (COLLECTION, index) {
+exports.findWithPagination = async function (COLLECTION, filter, sort, page, perPage) {
+    try {
+        const usePage = page ? page : 1
+        const usePerPage = perPage ? perPage : 10
+
+        const collection = database.collection(COLLECTION)
+
+        const totalDocuments = await collection.countDocuments(filter)
+        const totalPages = Math.ceil(totalDocuments / usePerPage)
+
+        const items = await collection
+            .find(filter)
+            .sort(sort)
+            .skip((usePage - 1) * usePerPage)
+            .limit(usePerPage)
+            .toArray()
+
+        return { totalDocuments, totalPages, page: usePage, perPage: usePerPage, documents: items }
+    } catch (error) {
+        console.error(error)
+    }
+}
+
+exports.verifyCreateIndex = async function (COLLECTION, index) {
     try {
         const collection = database.collection(COLLECTION)
         const indexes = await collection.listIndexes().toArray()
         const exists = indexes.some((eIndex) => {
             return eIndex.key.hasOwnProperty(index);
         });
+        if (!exists) collection.createIndex({ index: 1 })
         return exists
     } catch (error) {
         console.error(error)

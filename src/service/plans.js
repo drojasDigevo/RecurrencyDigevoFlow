@@ -20,11 +20,3 @@ exports.getPlanByName = async function (name) {
         console.error(error)
     }
 }
-
-exports.getNumberOfMonthsBetweenShipment = function (planDuration, deliveryFrequency) {
-    if (deliveryFrequency === 1) return 0
-    if (planDuration === 'annual') {
-        return (12 / deliveryFrequency)
-    }
-    return null
-}

@@ -7,12 +7,12 @@ const COLLECTION = "subscriptions"
 const collection = client.collection(COLLECTION)
 
 const SubscriptionStatus = Object.freeze({
-    Active: "Active",
-    Expired: "Expired",
-    Cancelled: "Cancelled",
-    Suspended: "Suspended",
-    Paused: "Paused",
-    Onhold: "Onhold",
+    Active: { id: 1, name: "Active" },
+    Expired: { id: 2, name: "Expired" },
+    Cancelled: { id: 3, name: "Cancelled" },
+    Suspended: { id: 4, name: "Suspended" },
+    Paused: { id: 5, name: "Paused" },
+    Onhold: { id: 6, name: "Onhold" },
 })
 
 exports.SubscriptionStatus = SubscriptionStatus
@@ -38,14 +38,12 @@ exports.findSubscriptionByIdSubscription = async function (idSubscription) {
 exports.loadSubscriptionFromAPI = async function (idSubscription) {
     try {
         const subscriptionCosmos = await collection.findOne({ idSubscription: idSubscription })
-        //FIX: cambiar por get subscription
         const data = await getAPISubscription(idSubscription)
-        // const plan = await getPlanByName(data.frequencyType.name)
-        // data.plan = plan
-        // await updateOne(COLLECTION, subscriptionCosmos.id, data)
-        return subscriptionCosmos
+        await updateOne(COLLECTION, subscriptionCosmos._id, data)
+        return data
     } catch (error) {
-        console.error(error)
+        console.error(error.message)
+        return false
     }
 }
 
@@ -53,7 +51,7 @@ exports.verifySubscriptionStatus = async function (idSubscription) {
     try {
         const subscription = await exports.loadSubscriptionFromAPI(idSubscription)
         const { status } = subscription
-        if ( status === SubscriptionStatus.Cancelled ) {
+        if ( status.id === SubscriptionStatus.Cancelled.id ) {
             // TODO: correo notificacion admin
             return false
         } else {
@@ -68,33 +66,34 @@ exports.verifySubscriptionStatus = async function (idSubscription) {
 exports.createSubscription = async function (data) {
     try {
         const { insertedId } = await insertOne(COLLECTION, data)
-        await createEvent(EventType.SUBSCRIPTION_CREATED, { subscriptionId: data.idSubscription })
+        await createEvent(EventType.SUBSCRIPTION_CREATED, { idSubscription: data.idSubscription })
         return { _id: insertedId }
     } catch (error) {
         console.error(error)
     }
 }
 
-exports.updateSubscriptionStatus = async function (idSubscription, status) {
+exports.updateSubscription = async function (idSubscription) {
     try {
-        if (status === SubscriptionStatus.Cancelled) {
-            const response = await exports.cancelSubscription(idSubscription)
-            return response
+        const isCancel = await exports.cancelSubscription(idSubscription)
+        const subscription = await exports.loadSubscriptionFromAPI(idSubscription)
+        if (isCancel && subscription) {
+            await createEvent(EventType.SUBSCRIPTION_CREATED, { idSubscription: idSubscription })
+            return true
         }
-        const subscription = await collection.findOne({ idSubscription: idSubscription })
-        const response = await updateOne(COLLECTION, subscription._id, { status })
-        return response
+        return false
     } catch (error) {
         console.error(error)
+        return error
     }
 }
 
 exports.cancelSubscription = async function (idSubscription) {
     try {
         const subscription = await collection.findOne({ idSubscription: idSubscription })
-        const response = await updateOne(COLLECTION, subscription._id, { status: SubscriptionStatus.Cancelled })
+        const { modifiedCount } = await updateOne(COLLECTION, subscription._id, { status: SubscriptionStatus.Cancelled })
         await cancelManyEventsBySubscription(idSubscription)
-        return response
+        return modifiedCount === 1
     } catch (error) {
         console.error(error)
     }

@@ -12,7 +12,7 @@ module.exports = async function (context, req) {
     } catch (error) {
         context.res = {
             status: 500,
-            body: error
+            body: { ok: false, message: 'Hubo un error inesperado', data: error }
         }
     }
 }

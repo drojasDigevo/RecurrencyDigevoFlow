@@ -2,7 +2,7 @@ const { scheduleMessage, cancelScheduledMessage } = require("../ServiceBusSender
 const client = require("../database/mongodb")
 const { ObjectId, Long } = require('mongodb');
 const { convertUTC, momentUTC } = require("../utils/dates");
-const { insertOne, updateOne, verifyIndexExists, updateManyFilter } = require("../utils/mongodb");
+const { insertOne, updateOne, verifyCreateIndex, updateManyFilter, findWithPagination } = require("../utils/mongodb");
 
 const COLLECTION = "events"
 const collection = client.collection(COLLECTION)
@@ -25,14 +25,13 @@ const EventStatus = Object.freeze({
     RECEIVED: "RECEIVED",
     CANCELLED: "CANCELLED",
 })
+exports.EventStatus = EventStatus
 
-
-exports.listEvent = async function () {
+exports.listEvent = async function (conditions, page, perPage) {
     try {
-        const indexExists = await verifyIndexExists('createdAt')
-        if (!indexExists) collection.createIndex({ 'createdAt': 1 })
-
-        const result = await collection.find().sort({ createdAt: 1 }).toArray()
+        await verifyCreateIndex(COLLECTION, 'updatedAt')
+        const sort = { updatedAt: -1 }
+        const result = await findWithPagination(COLLECTION, conditions, sort, page, perPage)
         return result
     } catch (error) {
         console.error(error)
@@ -97,11 +96,11 @@ exports.cancelEvent = async function (id) {
     }
 }
 
-exports.cancelManyEventsBySubscription = async function (subscriptionId) {
+exports.cancelManyEventsBySubscription = async function (idSubscription) {
     try {
         const events = await collection.find({
             $and: [
-                { "data.subscriptionId": subscriptionId },
+                { "data.idSubscription": idSubscription },
                 { status: EventStatus.CREATED },
             ]
         }, { sequenceNumber: 1 }).toArray()
@@ -110,7 +109,7 @@ exports.cancelManyEventsBySubscription = async function (subscriptionId) {
             await cancelScheduledMessage(sequenceNumbers)
             await updateManyFilter(COLLECTION, {
                 $and: [
-                    { "data.subscriptionId": subscriptionId },
+                    { "data.idSubscription": idSubscription },
                     { status: EventStatus.CREATED },
                 ]
             }, { status: EventStatus.CANCELLED })

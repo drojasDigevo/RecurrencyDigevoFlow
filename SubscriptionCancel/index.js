@@ -1,4 +1,4 @@
-const { cancelSubscription } = require("../src/service/subscriptions")
+const { cancelSubscription, findSubscriptionByIdSubscription } = require("../src/service/subscriptions")
 
 module.exports = async function (context, req) {
     try {
@@ -7,7 +7,7 @@ module.exports = async function (context, req) {
               "Content-Type": "application/json"
             },
             status: 202,
-            body: {}
+            body: { ok: false }
         }
 
         const body = req.body
@@ -16,14 +16,26 @@ module.exports = async function (context, req) {
 
         if ( idSubscription == null ) {
             context.res.status = 400
-            context.res.body = { error: `Value "idSubscription" don't exist` }
+            context.res.body = { ok: false, message: `El valor "idSubscription" no existe` }
+            return
+        }
+
+        const searchSubscription= await findSubscriptionByIdSubscription(idSubscription)
+        if ( searchSubscription == null ) {
+            context.res.status = 400
+            context.res.body = { ok: false, message: `No existe una subscripcion con idSubscription=${idSubscription}` }
             return
         }
 
         const response = await cancelSubscription(idSubscription)
 
-        context.res.status = 200
-        context.res.body = response
+        if (response) {
+            context.res.status = 200
+            context.res.body = { ok: true, message: "Se canceló correctamente"}
+        } else {
+            context.res.status = 500
+            context.res.body = { ok: false, message: 'Hubo un error inesperado' }
+        }
 
     } catch (error) {
         context.res = {
@@ -31,7 +43,7 @@ module.exports = async function (context, req) {
               "Content-Type": "application/json"
             },
             status: 500,
-            body: { error }
+            body: { ok: false, message: 'Hubo un error inesperado', data: error }
         }
     }
 }
