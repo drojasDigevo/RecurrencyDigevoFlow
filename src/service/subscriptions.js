@@ -52,7 +52,7 @@ exports.createInitialEvents = async function (idSubscription) {
     try {
         const subscription = await exports.loadSubscriptionFromAPI(idSubscription)
         if (subscription) {
-			var now = new Date(subscription.startDate);
+			var now = new Date();
 			var nextDate = new Date();
 			if(subscription.frequencyType.name == 'Mensual'){
 				// Se comenta temporalmente para ejecutar por minutos
