@@ -31,29 +31,11 @@ exports.paymentAPICollect = async function (transbankUser,amount,idSubscription)
 
 exports.paymentAPINotify = async function (idSubscription, payment) {
     try {
-        return true
-        //FIX: datos estaticos
         const response = await InstanceAPI.post(
             '/subscription/make_payment?code=FtlIXQZ64Dbl7rcuGrvI8DHemNlkZcjd0c9TpdmsVHgBAzFuFR2hHw==',
             {
                 idSubscription,
-                payment: {
-                    "payStatus": "approved",
-                    "statusDetail": "Approved detail",
-                    "idUserExternal": "12587",
-                    "authCode": "00-8722525",
-                    "cardType": "Visa",
-                    "expMonth": "02",
-                    "expYear": "25",
-                    "lastFour": "1910",
-                    "cardCategory": "CreditCard",
-                    "paymentType": "TransBank",
-                    "commerceCode": "0028871",
-                    "gatewayToken": "AAQ5545787DF54DF",
-                    "payDate": "2023-07-30T10:40",
-                    "installments": 1,
-                    "amount":25500
-                }
+                payment
             })
 
         if (response?.data) {
