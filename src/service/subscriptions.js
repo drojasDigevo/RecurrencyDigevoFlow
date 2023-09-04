@@ -54,11 +54,12 @@ exports.createInitialEvents = async function (idSubscription) {
         if (subscription) {
 			var now = new Date(subscription.startDate);
 			var nextDate = new Date();
-			if(subscription.frequencyType == 'Mensual'){
+			if(subscription.frequencyType.name == 'Mensual'){
 				nextDate.setMonth(now.getMonth() + (1 * subscription.frequency));
-			}else if(subscription.frequencyType == 'Semanal'){
+			}else if(subscription.frequencyType.name == 'Semanal'){
 				nextDate.setDate(now.getDate() + (7 * subscription.frequency));
 			}
+			console.log(nextDate);
             const { _id: eventShipmentId } = await createEvent(EventType.SHIPMENT_DISPATCHED, { idSubscription }, nextDate)
             const { _id: eventPaymentId } = await createEvent(EventType.PAYMENT_ATTEMPT, { idSubscription, attempts: 1 }, nextDate)
             await createSuccessLog(idSubscription, "Se crearon eventos iniciales", { eventShipmentId, eventPaymentId } )

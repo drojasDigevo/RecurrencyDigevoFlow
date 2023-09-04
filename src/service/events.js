@@ -70,6 +70,7 @@ function formatMessage (id, type) {
 exports.createEvent = async function (type, data, scheduledTime) {
     try {
         const scheduledDate = scheduledTime ? convertUTC(scheduledTime) : momentUTC()
+		console.log('-------------------------------------------',{scheduledDate,scheduledTime})
         const { insertedId } = await insertOne(COLLECTION, { type, data: data, status: EventStatus.CREATED, scheduledEnqueueTimeUtc: scheduledDate })
         const message = formatMessage(insertedId, type, scheduledDate)
         const response = await scheduleMessage(message, scheduledDate)
