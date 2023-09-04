@@ -55,14 +55,20 @@ exports.createInitialEvents = async function (idSubscription) {
 			var now = new Date(subscription.startDate);
 			var nextDate = new Date();
 			if(subscription.frequencyType.name == 'Mensual'){
-				nextDate.setMonth(now.getMonth() + (1 * subscription.frequency));
+				// Se comenta temporalmente para ejecutar por minutos
+				//nextDate.setMonth(now.getMonth() + (1 * subscription.frequency));
+				nextDate.setMinutes(now.getMinutes() + (1 * subscription.frequency));
 			}else if(subscription.frequencyType.name == 'Semanal'){
 				nextDate.setDate(now.getDate() + (7 * subscription.frequency));
+			}else if(subscription.frequencyType.name == 'Semestral'){
+				nextDate.setMonth(now.getMonth() + (6 * subscription.frequency));
+			}else if(subscription.frequencyType.name == 'Anual'){
+				nextDate.setFullYear(now.getFullYear() + (1 * subscription.frequency));
 			}
-			console.log(nextDate);
-            const { _id: eventShipmentId } = await createEvent(EventType.SHIPMENT_DISPATCHED, { idSubscription }, nextDate)
             const { _id: eventPaymentId } = await createEvent(EventType.PAYMENT_ATTEMPT, { idSubscription, attempts: 1 }, nextDate)
-            await createSuccessLog(idSubscription, "Se crearon eventos iniciales", { eventShipmentId, eventPaymentId } )
+            // TODO: Se comenta temporalmente para invocar desde un pago exitoso
+			//const { _id: eventShipmentId } = await createEvent(EventType.SHIPMENT_DISPATCHED, { idSubscription }, nextDate)
+            await createSuccessLog(idSubscription, "Se crearon eventos iniciales", { eventPaymentId } )
         } else {
             await createErrorLog(idSubscription, "No se pudo crear eventos iniciales")
         }

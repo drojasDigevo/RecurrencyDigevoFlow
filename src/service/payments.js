@@ -39,6 +39,9 @@ exports.attemptPaymentBySubscription = async function (idSubscription, attempts)
                 const notified = await paymentAPINotify(idSubscription, payment)
                 if (notified) {
                     await createSuccessLog(idSubscription, "Se notificó a la API de cobros", { paymentId })
+					
+					const { _id: eventShipmentId } = await createEvent(EventType.SHIPMENT_DISPATCHED, { idSubscription })
+					await createSuccessLog(idSubscription, "Se crearon nuevos eventos", { eventShipmentId } )
                 } else {
                     await createErrorLog(idSubscription, "Hubo un error al informar del cobro", { paymentId })
                 }
