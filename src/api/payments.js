@@ -31,6 +31,9 @@ exports.paymentAPICollect = async function (transbankUser,amount,idSubscription)
 
 exports.paymentAPINotify = async function (idSubscription, payment) {
     try {
+		return {
+			status: 'OK',
+		}
         const response = await InstanceAPI.post(
             '/subscription/make_payment?code=FtlIXQZ64Dbl7rcuGrvI8DHemNlkZcjd0c9TpdmsVHgBAzFuFR2hHw==',
             {
