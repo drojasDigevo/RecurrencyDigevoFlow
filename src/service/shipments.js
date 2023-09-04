@@ -28,12 +28,12 @@ exports.createShipmentBySubscription = async function (idSubscription) {
     try {
         const subscription = await verifySubscriptionStatus(idSubscription)
         if (subscription) {
-            const shipment = await shipmentAPICreate(idSubscription)
+			const shipment = await shipmentAPINotify(idSubscription, shipment)
             if (shipment) {
                 const { _id: shipmentId } = await createShipment({...shipment, idSubscription})
                 await createSuccessLog(idSubscription, "Se creó el despacho", { shipmentId })
 
-                const notified = await shipmentAPINotify(idSubscription, shipment)
+				const notified = await shipmentAPICreate(idSubscription)
                 if (notified) {
                     await createSuccessLog(idSubscription, "Se notificó a la API del despacho", { shipmentId })
                 } else {
