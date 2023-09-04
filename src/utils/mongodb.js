@@ -65,14 +65,18 @@ exports.findWithPagination = async function (COLLECTION, filter, sort, page, per
     }
 }
 
-exports.verifyCreateIndex = async function (COLLECTION, index) {
+exports.verifyCreateIndex = async function (COLLECTION, indexName) {
     try {
         const collection = database.collection(COLLECTION)
         const indexes = await collection.listIndexes().toArray()
         const exists = indexes.some((eIndex) => {
-            return eIndex.key.hasOwnProperty(index);
+            return eIndex.key.hasOwnProperty(indexName);
         });
-        if (!exists) collection.createIndex({ index: 1 })
+        const indexData = {}
+        indexData[indexName] = 1
+        if (!exists) {
+            collection.createIndex({...indexData})
+        }
         return exists
     } catch (error) {
         console.error(error)

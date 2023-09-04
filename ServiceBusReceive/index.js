@@ -1,6 +1,8 @@
 const { getReceivedEvent, EventType } = require("../src/service/events");
+const { sendNotification } = require("../src/service/notifications");
 const { attemptPaymentBySubscription } = require("../src/service/payments");
 const { createShipmentBySubscription } = require("../src/service/shipments");
+const { createInitialEvents } = require("../src/service/subscriptions");
 
 module.exports = async function(context, message) {
     const { messageId } = context.bindingData
@@ -15,14 +17,16 @@ module.exports = async function(context, message) {
 
     switch (type) {
         case EventType.SUBSCRIPTION_CREATED:
-            await createShipmentBySubscription(event.data.idSubscription)
-            await attemptPaymentBySubscription(event.data.idSubscription, 1)
+            await createInitialEvents(event.data.idSubscription)
             return
         case EventType.SHIPMENT_DISPATCHED:
             await createShipmentBySubscription(event.data.idSubscription)
             return
         case EventType.PAYMENT_ATTEMPT:
             await attemptPaymentBySubscription(event.data.idSubscription, event.data.attempts)
+            return
+        case EventType.SEND_NOTIFICATION:
+            await sendNotification(event.data.idSubscription, event.data.type)
             return
         default:
             return

@@ -1,4 +1,5 @@
-const { createSubscription, findSubscriptionByIdSubscription } = require("../src/service/subscriptions")
+const { listLogBySubscription } = require("../src/service/logs")
+const { findSubscriptionByIdSubscription } = require("../src/service/subscriptions")
 
 module.exports = async function (context, req) {
     try {
@@ -9,10 +10,8 @@ module.exports = async function (context, req) {
             status: 202,
             body: { ok: false }
         }
-
-        const body = req.body
-
-        const { idSubscription } = body
+    
+        const { idSubscription } = req.body
 
         if (!idSubscription) {
             context.res.status = 400
@@ -20,22 +19,23 @@ module.exports = async function (context, req) {
             return
         }
 
-        const subExists = await findSubscriptionByIdSubscription(idSubscription)
-        if (subExists) {
+        const found = await findSubscriptionByIdSubscription(idSubscription)
+        if (!found) {
             context.res.status = 400
-            context.res.body = { ok: false, message: `Ya existe una suscripción con idSubscription: ${idSubscription}` }
+            context.res.body = { ok: false, message: `No existe una suscripción con idSubscription: ${idSubscription}` }
             return
         }
 
-        const result = await createSubscription(idSubscription)
-        context.res.status = 200
-        context.res.body = { ok: true, message: 'Suscripción creada correctamente', data: result }
+        const logs = await listLogBySubscription(idSubscription)
 
-    } catch (error) {
         context.res = {
             headers: {
-                "Content-Type": "application/json"
+              "Content-Type": "application/json"
             },
+            body: { ok: true, data: logs }
+        }
+    } catch (error) {
+        context.res = {
             status: 500,
             body: { ok: false, message: 'Hubo un error inesperado', data: error }
         }

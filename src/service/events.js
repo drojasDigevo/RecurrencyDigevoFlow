@@ -3,6 +3,7 @@ const client = require("../database/mongodb")
 const { ObjectId, Long } = require('mongodb');
 const { convertUTC, momentUTC } = require("../utils/dates");
 const { insertOne, updateOne, verifyCreateIndex, updateManyFilter, findWithPagination } = require("../utils/mongodb");
+const { createErrorLog } = require("./logs");
 
 const COLLECTION = "events"
 const collection = client.collection(COLLECTION)
@@ -18,6 +19,7 @@ exports.EventType = Object.freeze({
     SUBSCRIPTION_CREATED: "SUBSCRIPTION_CREATED", // Define primeros eventos a encolar
     SHIPMENT_DISPATCHED: "SHIPMENT_DISPATCHED",
     PAYMENT_ATTEMPT: "PAYMENT_ATTEMPT",
+    SEND_NOTIFICATION: "SEND_NOTIFICATION",
 })
 
 const EventStatus = Object.freeze({
@@ -72,10 +74,16 @@ exports.createEvent = async function (type, data, scheduledTime) {
         const message = formatMessage(insertedId, type, scheduledDate)
         const response = await scheduleMessage(message, scheduledDate)
         const sequenceNumber = new Long(response.low, response.high, response.unsigned)
-        await updateOne(COLLECTION, insertedId, { sequenceNumber } )
-        return { _id: insertedId }
+        const { modifiedCount } = await updateOne(COLLECTION, insertedId, { sequenceNumber } )
+        if (modifiedCount === 1) {
+            return { _id: insertedId }
+        } else {
+            await createErrorLog(data.idSubscription, "No se actualizó el sequenceNumber del evento", { insertedId, sequenceNumber })
+            return false
+        }
     } catch (error) {
-        console.error(error)
+        await createErrorLog(data.idSubscription, "Ocurrio un error inesperado al crear un evento", error)
+        throw error
     }
 }
 

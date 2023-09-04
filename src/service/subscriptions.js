@@ -1,10 +1,12 @@
 const client = require("../database/mongodb")
 const { insertOne, updateOne } = require("../utils/mongodb")
-const { getAPISubscription } = require("../api/subscriptions")
+const { getAPISubscription, subscriptionAPILayOff, subscriptionAPIRenewal } = require("../api/subscriptions")
 const { createEvent, EventType, cancelManyEventsBySubscription } = require("./events")
+const { createErrorLog, createSuccessLog, createInfoLog } = require("./logs")
 
 const COLLECTION = "subscriptions"
 const collection = client.collection(COLLECTION)
+
 
 const SubscriptionStatus = Object.freeze({
     Active: { id: 1, name: "Active" },
@@ -22,7 +24,7 @@ exports.listSubscription = async function () {
         const result = await collection.find().toArray()
         return result
     } catch (error) {
-        console.error(error)
+        throw error
     }
 }
 
@@ -31,18 +33,34 @@ exports.findSubscriptionByIdSubscription = async function (idSubscription) {
         const result = await collection.findOne({ idSubscription: idSubscription })
         return result
     } catch (error) {
-        console.error(error)
+        return false
     }
 }
 
 exports.loadSubscriptionFromAPI = async function (idSubscription) {
     try {
-        const subscriptionCosmos = await collection.findOne({ idSubscription: idSubscription })
-        const data = await getAPISubscription(idSubscription)
-        await updateOne(COLLECTION, subscriptionCosmos._id, data)
-        return data
+        const subscriptionCosmos = await exports.findSubscriptionByIdSubscription(idSubscription)
+        const newData = await getAPISubscription(idSubscription)
+        await updateOne(COLLECTION, subscriptionCosmos._id, newData)
+        return newData
     } catch (error) {
-        console.error(error.message)
+        throw error
+    }
+}
+
+exports.createInitialEvents = async function (idSubscription) {
+    try {
+        const subscription = await exports.loadSubscriptionFromAPI(idSubscription)
+        if (subscription) {
+            //FIX: verificar sean las fechas
+            const { _id: eventShipmentId } = await createEvent(EventType.SHIPMENT_DISPATCHED, { idSubscription }, subscription.deliveryDate)
+            const { _id: eventPaymentId } = await createEvent(EventType.PAYMENT_ATTEMPT, { idSubscription, attempts: 1 }, subscription.paymentDate)
+            await createSuccessLog(idSubscription, "Se crearon eventos iniciales", { eventShipmentId, eventPaymentId } )
+        } else {
+            await createErrorLog(idSubscription, "No se pudo crear eventos iniciales")
+        }
+    } catch (error) {
+        await createErrorLog(idSubscription, "Ocurrio un error inesperado al crear eventos iniciales", { name: error.name, message: error.message })
         return false
     }
 }
@@ -52,27 +70,33 @@ exports.verifySubscriptionStatus = async function (idSubscription) {
         const subscription = await exports.loadSubscriptionFromAPI(idSubscription)
         const { status } = subscription
         if ( status.id === SubscriptionStatus.Cancelled.id ) {
-            // TODO: correo notificacion admin
+            await createInfoLog(idSubscription, "Se intentó realizar una accion con una suscripción cancelada")
             return false
         } else {
             return subscription
         }
     } catch (error) {
-        console.error(error)
-        //TODO notificar error
+        await createErrorLog(idSubscription, "Ocurrio un error inesperado al verificar el estado de la suscripción", { name: error.name, message: error.message })
+        return false
     }
 }
 
-exports.createSubscription = async function (data) {
+/**
+ * Crear suscripcion
+ */
+exports.createSubscription = async function (idSubscription) {
     try {
-        const { insertedId } = await insertOne(COLLECTION, data)
-        await createEvent(EventType.SUBSCRIPTION_CREATED, { idSubscription: data.idSubscription })
+        const { insertedId } = await insertOne(COLLECTION, { idSubscription })
+        await createEvent(EventType.SUBSCRIPTION_CREATED, { idSubscription })
         return { _id: insertedId }
     } catch (error) {
-        console.error(error)
+        throw error
     }
 }
 
+/**
+ * Actualizar suscripcion
+ */
 exports.updateSubscription = async function (idSubscription) {
     try {
         const isCancel = await exports.cancelSubscription(idSubscription)
@@ -88,13 +112,45 @@ exports.updateSubscription = async function (idSubscription) {
     }
 }
 
+/**
+ * Renovacion de suscripcion
+ */
+exports.renewalSubscription = async function (idSubscription) {
+    try {
+        const response = await subscriptionAPIRenewal(idSubscription)
+        if (response) {
+            //TODO: actualizar suscripcion
+            await createSuccessLog(idSubscription, "Se renovó la suscripción")
+            return true
+        }
+        await createErrorLog(idSubscription, "Hubo un error en el renovó de la suscripción")
+        return false
+    } catch (error) {
+        console.error(error)
+        return error
+    }
+}
+
+/**
+ * Cancelacion de suscripcion
+ */
 exports.cancelSubscription = async function (idSubscription) {
     try {
-        const subscription = await collection.findOne({ idSubscription: idSubscription })
-        const { modifiedCount } = await updateOne(COLLECTION, subscription._id, { status: SubscriptionStatus.Cancelled })
-        await cancelManyEventsBySubscription(idSubscription)
-        return modifiedCount === 1
+        const subscriptionCosmos = await exports.findSubscriptionByIdSubscription(idSubscription)
+        if (subscriptionCosmos) {
+            const cancelled = await subscriptionAPILayOff(idSubscription)
+            if (cancelled) {
+                const { modifiedCount } = await updateOne(COLLECTION, subscriptionCosmos._id, { status: SubscriptionStatus.Cancelled })
+                await cancelManyEventsBySubscription(idSubscription)
+                await createSuccessLog(idSubscription, "Se canceló correctamente la suscripción")
+                return modifiedCount === 1
+            } else {
+                await createErrorLog(idSubscription, "Hubo un error al cancelar la suscripción")
+            }
+        }
+        return false
     } catch (error) {
+        await createErrorLog(idSubscription, "Ocurrio un error inesperado al cancelar la suscripción", { name: error.name, message: error.message })
         console.error(error)
     }
 }

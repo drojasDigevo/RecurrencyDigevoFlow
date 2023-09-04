@@ -23,14 +23,14 @@ module.exports = async function (context, req) {
         const searchSubscription= await findSubscriptionByIdSubscription(idSubscription)
         if ( searchSubscription == null ) {
             context.res.status = 400
-            context.res.body = { ok: false, message: `No existe una subscripcion con idSubscription=${idSubscription}` }
+            context.res.body = { ok: false, message: `No existe una suscripción con idSubscription=${idSubscription}` }
             return
         }
 
         const response = await updateSubscription(idSubscription)
         if (response) {
             context.res.status = 200
-            context.res.body = { ok: true, message: "Subscripción actualizada correctamente", data: response }
+            context.res.body = { ok: true, message: "Suscripción actualizada correctamente", data: response }
         } else {
             context.res.status = 500
             context.res.body = { ok: false, message: "Hubo un error inesperado", data: response }
