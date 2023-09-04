@@ -10,7 +10,7 @@ exports.paymentAPICollect = async function (transbankUser,amount,idSubscription)
 			"email": "admin@ryk.cl",
 			"password": "[KqT7J]LH!q_]U)T"
 		})
-        const {data} = await axios.post(`/api/jwt/oneclick-mall/pago/${transbankUser}`,
+        const {data} = await axios.post(`https://api.digevopayments.com/api/jwt/oneclick-mall/pago/${transbankUser}`,
 			{
 				"codExternal": idSubscription,
 				"amount": amount,
