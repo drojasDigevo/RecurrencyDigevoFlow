@@ -52,9 +52,15 @@ exports.createInitialEvents = async function (idSubscription) {
     try {
         const subscription = await exports.loadSubscriptionFromAPI(idSubscription)
         if (subscription) {
-            //FIX: verificar sean las fechas
-            const { _id: eventShipmentId } = await createEvent(EventType.SHIPMENT_DISPATCHED, { idSubscription }, subscription.deliveryDate)
-            const { _id: eventPaymentId } = await createEvent(EventType.PAYMENT_ATTEMPT, { idSubscription, attempts: 1 }, subscription.paymentDate)
+			var now = new Date(subscription.startDate);
+			var nextDate = new Date();
+			if(subscription.frequencyType == 'Mensual'){
+				nextDate.setMonth(now.getMonth() + (1 * subscription.frequency));
+			}else if(subscription.frequencyType == 'Semanal'){
+				nextDate.setDate(now.getDate() + (7 * subscription.frequency));
+			}
+            const { _id: eventShipmentId } = await createEvent(EventType.SHIPMENT_DISPATCHED, { idSubscription }, nextDate)
+            const { _id: eventPaymentId } = await createEvent(EventType.PAYMENT_ATTEMPT, { idSubscription, attempts: 1 }, nextDate)
             await createSuccessLog(idSubscription, "Se crearon eventos iniciales", { eventShipmentId, eventPaymentId } )
         } else {
             await createErrorLog(idSubscription, "No se pudo crear eventos iniciales")
