@@ -3,18 +3,12 @@ const moment = require("moment-timezone")
 
 exports.shipmentAPICreate = async function (idSubscription) {
     try {
-        /*
-        const response = await InstanceAPI.post('/pending',
-            {
-                idSubscription
-            })
-        */
-        //FIX: datos estaticos
-        const now = moment()
-        const delivery_date = now.clone().add(moment.duration(95, 'seconds'))
+        const response = await InstanceAPI.post('/send_information_customer?code=FtlIXQZ64Dbl7rcuGrvI8DHemNlkZcjd0c9TpdmsVHgBAzFuFR2hHw==',
+		{
+			idSubscription
+		})
         return {
-            more_data: "more_data",
-            delivery_date: delivery_date
+            data: response?.data || false
         }
     } catch (error) {
         throw error
@@ -23,32 +17,11 @@ exports.shipmentAPICreate = async function (idSubscription) {
 
 exports.shipmentAPINotify = async function (idSubscription, dispatch) {
     try {
-        return false
-        //FIX: datos estaticos
         const response = await InstanceAPI.post(
             '/gateway/resend?code=3DPa0ylJaenaHpE7neI8xQETJl7rjzW-YTFf4MGb1OqKAzFuPkQo8g==',
             {
                 idSubscription,
-                dispatch: {
-                    "typeIdentification": "1",
-                    "identification": "25852369-2",
-                    "firstName": "Cristian",
-                    "lastName": "Rojas",
-                    "emailAddress": "drojas@digevo.com",
-                    "address": "Avenida Francia, La Cisterna",
-                    "address2": "",
-                    "adReference": "",
-                    "city": "Santiago",
-                    "country": "CL",
-                    "phoneNumber": "975859663",
-                    "postalCode": "1",
-                    "idCourier": "24",
-                    "courierName": "Chilepost",
-                    "deliveryDate": "",
-                    "approvalDelivey": "",
-                    "deliveryStatus": "",
-                    "locality": "Huechuraba"
-                }
+                dispatch
             })
 
         if (response?.data) {
