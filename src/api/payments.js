@@ -1,22 +1,29 @@
-const InstanceAPI = require("../utils/axios")
+const axios = require('axios')
 const moment = require("moment-timezone")
+const InstanceAPI = require("../utils/axios")
 
-exports.paymentAPICollect = async function (idSubscription) {
+exports.paymentAPICollect = async function (transbankUser,amount,idSubscription) {
     try {
-        return false // TEST: para probar limite de intentos de cobro
-        /*
-        const response = await InstanceAPI.post('/pending',
-            {
-                idSubscription
-            })
-        */
-        //FIX: datos estaticos
-        const now = moment()
-        const next_payment_date = now.clone().add(moment.duration(90, 'seconds'))
-        return {
-            more_data: "more_data",
-            next_payment_date: next_payment_date
-        }
+        //return false // TEST: para probar limite de intentos de cobro
+        const {data:{token}} = await axios.post(`https://api.digevopayments.com/api/login`,
+		{
+			"email": "admin@ryk.cl",
+			"password": "[KqT7J]LH!q_]U)T"
+		})
+        const {data} = await axios.post(`/api/jwt/oneclick-mall/pago/${transbankUser}`,
+			{
+				"codExternal": idSubscription,
+				"amount": amount,
+				"installments": "1",
+				"urlOK": "",
+				"urlError": "",
+				"urlNotify": ""
+			},
+			{
+				headers: {Authorization:`Bearer ${token}`}
+			}
+		)
+        return data
     } catch (error) {
         throw error
     }
@@ -49,8 +56,8 @@ exports.paymentAPINotify = async function (idSubscription, payment) {
                 }
             })
 
-        if (response) {
-            const { statusCode, content } = response
+        if (response?.data) {
+            const { statusCode, content } = response.data
             if (statusCode === 200) return content
         }
         throw new Error("Error API /subscription/make_payment");

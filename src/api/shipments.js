@@ -51,8 +51,8 @@ exports.shipmentAPINotify = async function (idSubscription, dispatch) {
                 }
             })
 
-        if (response) {
-            const { statusCode, content } = response
+        if (response?.data) {
+            const { statusCode, content } = response.data
             if (statusCode === 200) return content
         }
         throw new Error("Error API /gateway/resend");

@@ -30,7 +30,7 @@ exports.attemptPaymentBySubscription = async function (idSubscription, attempts)
     try {
         const subscription = await verifySubscriptionStatus(idSubscription)
         if (subscription) {
-            const payment = await paymentAPICollect(idSubscription)
+            const payment = await paymentAPICollect(subscription.paymentMethod.gatewayToken,subscription.totalAmountToPay,idSubscription)
 
             if (payment) {
                 const { _id: paymentId } = await createPayment({...payment, idSubscription})
