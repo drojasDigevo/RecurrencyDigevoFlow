@@ -31,16 +31,13 @@ exports.paymentAPICollect = async function (transbankUser,amount,idSubscription)
 
 exports.paymentAPINotify = async function (idSubscription, payment) {
     try {
-		return {
-			"status": "OK",
-		}
         const response = await InstanceAPI.post(
             '/subscription/make_payment?code=FtlIXQZ64Dbl7rcuGrvI8DHemNlkZcjd0c9TpdmsVHgBAzFuFR2hHw==',
             {
                 idSubscription,
                 payment:{
 					payStatus: 'approved',
-					statusDetails: 'Approved detail',
+					statusDetail: 'Approved detail',
 					idUserExternal: payment.id_user_external,
 					authCode: payment.auth_code,
 					cardType: payment.card_type,
@@ -48,7 +45,7 @@ exports.paymentAPINotify = async function (idSubscription, payment) {
 					expYear: "",
 					lastFour: payment.last_four,
 					cardCategory: "",
-					paymentType: payment.source,
+					paymentType: 'Transbank',
 					commerceCode: payment.commerce_code,
 					gatewayToken: payment.transbank_user,
 					payDate: payment.payment_date,
