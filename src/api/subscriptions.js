@@ -44,12 +44,12 @@ exports.subscriptionAPIRenewal = async function (idSubscription) {
 exports.subscriptionAPILayOff = async function (idSubscription) {
     try {
         const response = await InstanceAPI.post(
-            '/subscription/cancel?code=FtlIXQZ64Dbl7rcuGrvI8DHemNlkZcjd0c9TpdmsVHgBAzFuFR2hHw==',
+            '/subscription/lay_off?code=FtlIXQZ64Dbl7rcuGrvI8DHemNlkZcjd0c9TpdmsVHgBAzFuFR2hHw==',
             {
                 idSubscription: idSubscription,
-                idReason: 1,
-                subReason: 1,
-                description: "Cancelado por incumplimiento en el pago"
+                idReason: 2,
+                subReason: 6,
+                description: "Suspendido por razones varias"
             })
         if (response?.data) {
             const { statusCode, content } = response.data
