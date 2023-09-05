@@ -25,7 +25,6 @@ exports.shipmentAPINotify = async function (idSubscription, dispatch) {
                 dispatch
             },
 			{headers:{'Authorization': 'Bearer ADJKDFJKJF52554FKJDKJKIF---**FJHDJHJDHJHDJHDKLF5'}})
-
         if (response?.data) {
             const { statusCode, content } = response.data
             if (statusCode === 200) return content
