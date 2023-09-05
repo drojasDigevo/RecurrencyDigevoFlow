@@ -51,6 +51,7 @@ exports.attemptPaymentBySubscription = async function (idSubscription, attempts)
 				let totalIterations = subscription.totalQuantity;
 				if(subscription.frequencyType.name == 'Mensual'){
 					totalIterations = 12 / subscription.frequency;
+					totalIterations = totalIterations - 1;
 				}else if(subscription.frequencyType.name == 'Semestral'){
 					//totalIterations = 6 / subscription.frequency;
 				}else if(subscription.frequencyType.name == 'Anual'){
