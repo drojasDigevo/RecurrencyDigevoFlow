@@ -81,8 +81,7 @@ exports.createInitialEvents = async function (idSubscription) {
 			}else if(subscription.frequencyType.name == 'Anual'){
 				nextDate.setFullYear(now.getFullYear() + (1 * subscription.frequency));
 			}
-            //const { _id: eventPaymentId } = await createEvent(EventType.PAYMENT_ATTEMPT, { idSubscription, attempts: 1 }, nextDate)
-            const { _id: eventPaymentId } = await createEvent(EventType.PAYMENT_ATTEMPT, { idSubscription, attempts: 1 })
+            const { _id: eventPaymentId } = await createEvent(EventType.PAYMENT_ATTEMPT, { idSubscription, attempts: 1 }, nextDate)
             // TODO: Se comenta temporalmente para invocar desde un pago exitoso
 			//const { _id: eventShipmentId } = await createEvent(EventType.SHIPMENT_DISPATCHED, { idSubscription }, nextDate)
             await createSuccessLog(idSubscription, "Se crearon eventos iniciales", { eventPaymentId } )

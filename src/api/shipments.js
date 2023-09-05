@@ -1,4 +1,5 @@
 const InstanceAPI = require("../utils/axios")
+const axios = require("axios")
 const moment = require("moment-timezone")
 
 exports.shipmentAPICreate = async function (idSubscription) {
@@ -17,8 +18,8 @@ exports.shipmentAPICreate = async function (idSubscription) {
 
 exports.shipmentAPINotify = async function (idSubscription, dispatch) {
     try {
-        const response = await InstanceAPI.post(
-            '/gateway/resend?code=3DPa0ylJaenaHpE7neI8xQETJl7rjzW-YTFf4MGb1OqKAzFuPkQo8g==',
+        const response = await axios.post(
+            'https://gatewayrykqa.azurewebsites.net/api/gateway/resend?code=3DPa0ylJaenaHpE7neI8xQETJl7rjzW-YTFf4MGb1OqKAzFuPkQo8g==',
             {
                 idSubscription,
                 dispatch

@@ -41,7 +41,7 @@ exports.createShipmentBySubscription = async function (idSubscription) {
 				"country": subscription.beneficiary.country,
 				"phoneNumber": subscription.beneficiary.phoneNumber,
 				"postalCode": subscription.beneficiary.postalCode,
-				"idCourier": "24",
+				"idCourier": "1",
 				"courierName": "Chilepost",
 				"deliveryDate": "",
 				"approvalDelivey": "",
