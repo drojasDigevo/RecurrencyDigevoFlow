@@ -71,15 +71,17 @@ exports.createInitialEvents = async function (idSubscription) {
 			var now = new Date();
 			var nextDate = new Date();
 			if(subscription.frequencyType.name == 'Mensual'){
-				// Se comenta temporalmente para ejecutar por minutos
-				//nextDate.setMonth(now.getMonth() + (1 * subscription.frequency));
-				nextDate.setMinutes(now.getMinutes() + (1 * subscription.frequency));
+				nextDate.setMonth(now.getMonth() + (1 * subscription.frequency));
 			}else if(subscription.frequencyType.name == 'Semanal'){
 				nextDate.setDate(now.getDate() + (7 * subscription.frequency));
 			}else if(subscription.frequencyType.name == 'Semestral'){
 				nextDate.setMonth(now.getMonth() + (6 * subscription.frequency));
 			}else if(subscription.frequencyType.name == 'Anual'){
 				nextDate.setFullYear(now.getFullYear() + (1 * subscription.frequency));
+			}
+			// TO FIX: Esto es temporal, para acelerar el proceso de pruebas
+			if(subscription.frequencyType.name == 'Mensual' && subscription.frequency == 1){
+				nextDate.setMinutes(now.getMinutes() + (1 * subscription.frequency));
 			}
             const { _id: eventPaymentId } = await createEvent(EventType.PAYMENT_ATTEMPT, { idSubscription, attempts: 1 }, nextDate)
             // TODO: Se comenta temporalmente para invocar desde un pago exitoso
