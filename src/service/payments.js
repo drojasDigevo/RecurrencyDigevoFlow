@@ -48,7 +48,15 @@ exports.attemptPaymentBySubscription = async function (idSubscription, attempts)
 
                 const payments = await listPaymentsBySubscription(idSubscription)
                 // FIX: API deberia devolver si existen mas pagos? ahora se esta tomando "frequency" de la suscripción
-                if (subscription.totalQuantity > payments.length) {
+				let totalIterations = subscription.totalQuantity;
+				if(subscription.frequencyType.name == 'Mensual'){
+					totalIterations = 12 / subscription.frequency;
+				}else if(subscription.frequencyType.name == 'Semestral'){
+					//totalIterations = 6 / subscription.frequency;
+				}else if(subscription.frequencyType.name == 'Anual'){
+					//totalIterations = 1;
+				}
+                if (totalIterations > payments.length) {
                     await createEvent(EventType.PAYMENT_ATTEMPT, { idSubscription, attempts: 1 }, payment.next_payment_date)
                 }
 
