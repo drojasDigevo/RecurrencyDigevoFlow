@@ -1,5 +1,5 @@
 const client = require("../database/mongodb")
-const { insertOne } = require("../utils/mongodb")
+const { insertOne, verifyCreateIndex } = require("../utils/mongodb")
 
 const COLLECTION = "logs"
 const collection = client.collection(COLLECTION)
@@ -13,7 +13,8 @@ const LogType = Object.freeze({
 
 exports.listLogBySubscription = async function (idSubscription) {
     try {
-        const result = await collection.find({ idSubscription: idSubscription }).toArray()
+        await verifyCreateIndex(COLLECTION, 'updatedAt')
+        const result = await collection.find({ idSubscription: idSubscription }).sort({ updatedAt: -1 }).toArray()
         return result
     } catch (error) {
         console.log(error)

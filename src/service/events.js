@@ -33,7 +33,7 @@ exports.listEvent = async function (conditions, page, perPage) {
     try {
         await verifyCreateIndex(COLLECTION, 'updatedAt')
         const sort = { updatedAt: -1 }
-        const result = await findWithPagination(COLLECTION, conditions, sort, page, perPage)
+        const result = await findWithPagination(COLLECTION, conditions, {}, sort, page, perPage)
         return result
     } catch (error) {
         console.error(error)

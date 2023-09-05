@@ -28,7 +28,26 @@ exports.createShipmentBySubscription = async function (idSubscription) {
     try {
         const subscription = await verifySubscriptionStatus(idSubscription)
         if (subscription) {
-			const shipment = await shipmentAPINotify(idSubscription, shipment)
+			const shipment = await shipmentAPINotify(idSubscription, {
+				"typeIdentification": "1",
+				"identification": subscription.beneficiary.identification,
+				"firstName": subscription.beneficiary.firstName,
+				"lastName": subscription.beneficiary.lastName,
+				"emailAddress": subscription.beneficiary.emailAddress,
+				"address": subscription.beneficiary.address,
+				"address2": subscription.beneficiary.address2,
+				"adReference": subscription.beneficiary.adReference,
+				"city": subscription.beneficiary.city,
+				"country": subscription.beneficiary.country,
+				"phoneNumber": subscription.beneficiary.phoneNumber,
+				"postalCode": subscription.beneficiary.postalCode,
+				"idCourier": "24",
+				"courierName": "Chilepost",
+				"deliveryDate": "",
+				"approvalDelivey": "",
+				"deliveryStatus": "",
+				"locality": "Huechuraba"
+			})
             if (shipment) {
                 const { _id: shipmentId } = await createShipment({...shipment, idSubscription})
                 await createSuccessLog(idSubscription, "Se creó el despacho", { shipmentId })

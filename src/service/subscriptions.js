@@ -1,5 +1,5 @@
 const client = require("../database/mongodb")
-const { insertOne, updateOne } = require("../utils/mongodb")
+const { insertOne, updateOne, findWithPagination, verifyCreateIndex } = require("../utils/mongodb")
 const { getAPISubscription, subscriptionAPILayOff, subscriptionAPIRenewal } = require("../api/subscriptions")
 const { createEvent, EventType, cancelManyEventsBySubscription } = require("./events")
 const { createErrorLog, createSuccessLog, createInfoLog } = require("./logs")
@@ -19,12 +19,28 @@ const SubscriptionStatus = Object.freeze({
 
 exports.SubscriptionStatus = SubscriptionStatus
 
-exports.listSubscription = async function () {
+/**
+ * Listado de suscripciones con paginacion
+ * @param {number} page - Pagina actual
+ * @param {number} perPage - Cantidad de registros por pagina
+ * @returns Listado paginado
+ */
+exports.listSubscription = async function (page, perPage) {
     try {
-        const result = await collection.find().toArray()
+        await verifyCreateIndex(COLLECTION, 'updatedAt')
+        const sort = { updatedAt: -1 }
+        const project = {
+            idSubscription: 1,
+            createdAt: 1,
+            updatedAt: 1,
+            description: 1,
+            "status.name": 1,
+            "customer.emailAddress": 1,
+        }
+        const result = await findWithPagination(COLLECTION, {}, project, sort, page, perPage)
         return result
     } catch (error) {
-        throw error
+        console.error(error)
     }
 }
 
@@ -65,7 +81,8 @@ exports.createInitialEvents = async function (idSubscription) {
 			}else if(subscription.frequencyType.name == 'Anual'){
 				nextDate.setFullYear(now.getFullYear() + (1 * subscription.frequency));
 			}
-            const { _id: eventPaymentId } = await createEvent(EventType.PAYMENT_ATTEMPT, { idSubscription, attempts: 1 }, nextDate)
+            //const { _id: eventPaymentId } = await createEvent(EventType.PAYMENT_ATTEMPT, { idSubscription, attempts: 1 }, nextDate)
+            const { _id: eventPaymentId } = await createEvent(EventType.PAYMENT_ATTEMPT, { idSubscription, attempts: 1 })
             // TODO: Se comenta temporalmente para invocar desde un pago exitoso
 			//const { _id: eventShipmentId } = await createEvent(EventType.SHIPMENT_DISPATCHED, { idSubscription }, nextDate)
             await createSuccessLog(idSubscription, "Se crearon eventos iniciales", { eventPaymentId } )

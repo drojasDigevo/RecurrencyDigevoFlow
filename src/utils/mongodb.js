@@ -42,10 +42,22 @@ exports.updateManyFilter = async function (COLLECTION, filter, newData) {
     }
 }
 
-exports.findWithPagination = async function (COLLECTION, filter, sort, page, perPage) {
+/**
+ * Busqueda con paginacion
+ * @param {string} COLLECTION - Nombre de la coleccion donde buscar
+ * @param {object} filter - Objeto para filtrar registros
+ * @param {object} project -Condicion visualizacion de campos
+ * @param {object} sort - Orden que se presentará
+ * @param {number} page - Pagina actual
+ * @param {number} perPage - Cantidad de registros por pagina
+ * @returns Listado paginado
+ */
+exports.findWithPagination = async function (COLLECTION, filter, project, sort, page, perPage) {
     try {
         const usePage = page ? page : 1
         const usePerPage = perPage ? perPage : 10
+        const useProject = project ? project : {}
+        const useSort = sort ? sort : {}
 
         const collection = database.collection(COLLECTION)
 
@@ -54,7 +66,8 @@ exports.findWithPagination = async function (COLLECTION, filter, sort, page, per
 
         const items = await collection
             .find(filter)
-            .sort(sort)
+            .project(useProject)
+            .sort(useSort)
             .skip((usePage - 1) * usePerPage)
             .limit(usePerPage)
             .toArray()
