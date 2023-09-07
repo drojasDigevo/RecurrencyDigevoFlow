@@ -177,20 +177,21 @@ exports.renewalSubscription = async function (idSubscription) {
 exports.cancelSubscription = async function (idSubscription) {
 	try {
 		const subscriptionCosmos = await exports.findSubscriptionByIdSubscription(idSubscription);
+		let isModified = false;
 		if (subscriptionCosmos) {
 			/*const cancelled = await subscriptionAPILayOff(idSubscription)
             if (cancelled) {*/
 			const { modifiedCount } = await updateOne(COLLECTION, subscriptionCosmos._id, {
 				status: SubscriptionStatus.Cancelled,
 			});
-			await cancelManyEventsBySubscription(idSubscription);
-			await createSuccessLog(idSubscription, "Se canceló correctamente la suscripción");
-			return modifiedCount === 1;
+			isModified = modifiedCount === 1;
 			/*} else {
                 await createErrorLog(idSubscription, "Hubo un error al cancelar la suscripción")
             }*/
 		}
-		return false;
+		await cancelManyEventsBySubscription(idSubscription);
+		await createSuccessLog(idSubscription, "Se canceló correctamente la suscripción");
+		return isModified;
 	} catch (error) {
 		await createErrorLog(idSubscription, "Ocurrio un error inesperado al cancelar la suscripción", {
 			name: error.name,
