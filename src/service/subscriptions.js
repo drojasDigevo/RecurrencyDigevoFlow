@@ -174,11 +174,12 @@ exports.renewalSubscription = async function (idSubscription) {
 /**
  * Cancelacion de suscripcion
  */
-exports.cancelSubscription = async function (idSubscription) {
+exports.cancelSubscription = async function (idSubscription, shouldCancel = false) {
 	try {
 		const subscriptionCosmos = await exports.findSubscriptionByIdSubscription(idSubscription);
 		let isModified = false;
 		if (subscriptionCosmos) {
+			if (shouldCancel) await subscriptionAPILayOff(idSubscription);
 			/*const cancelled = await subscriptionAPILayOff(idSubscription)
             if (cancelled) {*/
 			const { modifiedCount } = await updateOne(COLLECTION, subscriptionCosmos._id, {
