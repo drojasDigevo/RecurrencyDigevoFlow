@@ -80,6 +80,7 @@ exports.createInitialEvents = async function (idSubscription) {
 			}
 			// TO FIX: Esto es temporal, para acelerar el proceso de pruebas
 			if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 1) {
+				nextDate = new Date();
 				nextDate.setMinutes(now.getMinutes() + 1 * subscription.frequency);
 			}
 			const { _id: eventPaymentId } = await createEvent(
