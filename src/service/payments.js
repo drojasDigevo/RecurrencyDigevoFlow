@@ -3,7 +3,7 @@ const client = require("../database/mongodb");
 const { insertOne } = require("../utils/mongodb");
 const { createEvent, EventType } = require("./events");
 const { verifySubscriptionStatus, cancelSubscription } = require("./subscriptions");
-const { paymentAPICollect, paymentAPINotify } = require("../api/payments");
+const { paymentAPICollect, paymentAPINotify, sendMailSuccessfull } = require("../api/payments");
 const { getConfigByCode } = require("./config");
 const { CONFIG_CODES } = require("../utils/constants");
 const { createErrorLog, createSuccessLog, createInfoLog } = require("./logs");
@@ -30,17 +30,17 @@ exports.attemptPaymentBySubscription = async function (idSubscription, attempts)
 	try {
 		const subscription = await verifySubscriptionStatus(idSubscription);
 		if (subscription) {
-			const payment = await paymentAPICollect(
+			const {isOk,payment} = await paymentAPICollect(
 				subscription.paymentMethod.gatewayToken,
 				subscription.unitAmount,
 				idSubscription
 			);
 
-			if (payment) {
+			if (isOk) {
 				const { _id: paymentId } = await createPayment({ ...payment, idSubscription });
 				await createSuccessLog(idSubscription, "Se creó el cobro", { paymentId });
 
-				const notified = await paymentAPINotify(idSubscription, payment);
+				const notified = await paymentAPINotify(idSubscription, payment, {status:'approved',status_detail:'Approved detail'});
 				if (notified) {
 					await createSuccessLog(idSubscription, "Se notificó a la API de cobros", { paymentId });
 
@@ -51,6 +51,26 @@ exports.attemptPaymentBySubscription = async function (idSubscription, attempts)
 				} else {
 					await createErrorLog(idSubscription, "Hubo un error al informar del cobro", { paymentId });
 				}
+
+				await sendMailSuccessfull(idSubscription, {
+					to: "vonealmar@gmail.com",
+					type: "html",
+					subject: "Buenas noticias",
+					customFrom: "drojas@digevo.com",
+					fromName: "RyK",
+					body: {
+						amountCuote: "31800,00",
+						customer: "Alfonso Araujo",
+						document: "26627439-4",
+						fullValuePlan: "280000",
+						nextCollectionDate: "01/02/2024",
+						numberOfInstallments: " 2 de 2",
+						plan: "Lentes de contacto Manchester Duplex",
+						shippingAddress: "Carrera 72 CL Francia, La Cisterna",
+					},
+					idAccount: 1,
+					operation: "SUCCESSFULPAYMENT",
+				});
 
 				const payments = await listPaymentsBySubscription(idSubscription);
 				// FIX: API deberia devolver si existen mas pagos? ahora se esta tomando "frequency" de la suscripción
@@ -71,7 +91,34 @@ exports.attemptPaymentBySubscription = async function (idSubscription, attempts)
 					);
 				}
 			} else {
+				console.log('------------------------------------');
+				console.log('No se pudo pagar')
+				console.log(payment)
+				console.log('------------------------------------');
 				await createInfoLog(idSubscription, "Intento de cobro fallido", { attempts });
+
+				const errorStatus = {
+					status: payment.status || "rejected",
+					status_detail: payment.status_detail || "Failed detail",
+				};
+				errorStatus.status = errorStatus.status+'';
+				errorStatus.status_detail = errorStatus.status_detail+'';
+				await paymentAPINotify(idSubscription, {
+					id_user_external: subscription.paymentMethod.idUserExternal,
+					auth_code: subscription.paymentMethod.authCode,
+					card_type: subscription.paymentMethod.cardType,
+					expMonth: "",
+					expYear: "",
+					last_four: subscription.paymentMethod.lastFour,
+					cardCategory: "",
+					source: subscription.paymentMethod.paymentType,
+					commerce_code: subscription.paymentMethod.commerceCode,
+					transbank_user: subscription.paymentMethod.gatewayToken,
+					payment_date: moment().format("YYYY-MM-DD HH:mm:ss"),
+					installments: 1,
+					amount: subscription.unitAmount,
+				}, errorStatus);
+				console.log('se ha guardado pago fallido')
 
 				const configTotalAttempts = await getConfigByCode(CONFIG_CODES.PAYMENT_NUMBER_OF_ATTEMPTS);
 				const totalAttempts = Number(configTotalAttempts.value);
