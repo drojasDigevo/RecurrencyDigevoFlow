@@ -70,37 +70,21 @@ exports.paymentAPINotify = async function (idSubscription, payment, statusRespon
 	}
 };
 
-exports.sendMailSuccessfull = async function (idSubscription, bodyEmail) {
+exports.sendMailSuccessfull = async function (bodyEmail) {
 	try {
 		const response = await InstanceAPI.post(
 			"/subscription/send_email?code=FtlIXQZ64Dbl7rcuGrvI8DHemNlkZcjd0c9TpdmsVHgBAzFuFR2hHw==",
-			{
-				to: "vonealmar@gmail.com",
-				type: "html",
-				subject: "Buenas noticias",
-				customFrom: "drojas@digevo.com",
-				fromName: "RyK",
-				body: {
-					amountCuote: "31800,00",
-					customer: "Alfonso Araujo",
-					document: "26627439-4",
-					fullValuePlan: "280000",
-					nextCollectionDate: "01/02/2024",
-					numberOfInstallments: " 2 de 2",
-					plan: "Lentes de contacto Manchester Duplex",
-					shippingAddress: "Carrera 72 CL Francia, La Cisterna",
-				},
-				idAccount: 1,
-				operation: "SUCCESSFULPAYMENT",
-			}
+			bodyEmail
 		);
 
 		if (response?.data) {
 			const { statusCode, content } = response.data;
 			if (statusCode === 200) return content;
 		}
-		throw new Error("Error API /subscription/make_payment");
+		//throw new Error("Error API /subscription/send_email");
+		return false;
 	} catch (error) {
-		throw error;
+		//throw error;
+		return false;
 	}
 };

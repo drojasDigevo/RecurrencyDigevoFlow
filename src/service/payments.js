@@ -52,26 +52,6 @@ exports.attemptPaymentBySubscription = async function (idSubscription, attempts)
 					await createErrorLog(idSubscription, "Hubo un error al informar del cobro", { paymentId });
 				}
 
-				await sendMailSuccessfull(idSubscription, {
-					to: "vonealmar@gmail.com",
-					type: "html",
-					subject: "Buenas noticias",
-					customFrom: "drojas@digevo.com",
-					fromName: "RyK",
-					body: {
-						amountCuote: "31800,00",
-						customer: "Alfonso Araujo",
-						document: "26627439-4",
-						fullValuePlan: "280000",
-						nextCollectionDate: "01/02/2024",
-						numberOfInstallments: " 2 de 2",
-						plan: "Lentes de contacto Manchester Duplex",
-						shippingAddress: "Carrera 72 CL Francia, La Cisterna",
-					},
-					idAccount: 1,
-					operation: "SUCCESSFULPAYMENT",
-				});
-
 				const payments = await listPaymentsBySubscription(idSubscription);
 				// FIX: API deberia devolver si existen mas pagos? ahora se esta tomando "frequency" de la suscripción
 				let totalIterations = subscription.totalQuantity;
@@ -90,11 +70,27 @@ exports.attemptPaymentBySubscription = async function (idSubscription, attempts)
 						payment.next_payment_date
 					);
 				}
+
+				await sendMailSuccessfull({
+					to: subscription.customer.emailAddress,
+					type: "html",
+					subject: "Buenas noticias",
+					customFrom: "drojas@digevo.com",
+					fromName: "RyK",
+					body: {
+						amountCuote: subscription.unitAmount,
+						customer: subscription.customer.firstName + " " + subscription.customer.lastName,
+						document: subscription.customer.identification,
+						fullValuePlan: subscription.totalAmountToPay,
+						nextCollectionDate: payment.next_payment_date,
+						numberOfInstallments: " 2 de 2",
+						plan: subscription.description,
+						shippingAddress: subscription.beneficiary.address+', '+subscription.beneficiary.address2+', '+subscription.beneficiary.city,
+					},
+					idAccount: subscription.account.idAccount,
+					operation: "SUCCESSFULPAYMENT",
+				});
 			} else {
-				console.log('------------------------------------');
-				console.log('No se pudo pagar')
-				console.log(payment)
-				console.log('------------------------------------');
 				await createInfoLog(idSubscription, "Intento de cobro fallido", { attempts });
 
 				const errorStatus = {
@@ -118,7 +114,6 @@ exports.attemptPaymentBySubscription = async function (idSubscription, attempts)
 					installments: 1,
 					amount: subscription.unitAmount,
 				}, errorStatus);
-				console.log('se ha guardado pago fallido')
 
 				const configTotalAttempts = await getConfigByCode(CONFIG_CODES.PAYMENT_NUMBER_OF_ATTEMPTS);
 				const totalAttempts = Number(configTotalAttempts.value);
