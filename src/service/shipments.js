@@ -26,6 +26,7 @@ async function listShipmentsBySubscription (idSubscription) {
 
 exports.createShipmentBySubscription = async function (idSubscription) {
     try {
+		console.log('INICIAR DESPACHO')
         const subscription = await verifySubscriptionStatus(idSubscription)
         if (subscription) {
 			const shipment = await shipmentAPINotify(idSubscription, {

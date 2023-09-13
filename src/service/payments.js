@@ -82,7 +82,9 @@ exports.attemptPaymentBySubscription = async function (idSubscription, attempts)
 						customer: subscription.customer.firstName + " " + subscription.customer.lastName,
 						document: subscription.customer.identification,
 						fullValuePlan: subscription.totalAmountToPay,
-						nextCollectionDate: payment.next_payment_date,
+						//nextCollectionDate: payment.next_payment_date,
+						nextCollectionDate: moment().add(1,'minutes').format("YYYY-MM-DD HH:mm:ss"),
+						dateofpayment: moment().format("DD/MM/YYYY"),
 						numberOfInstallments: " 2 de 2",
 						plan: subscription.description,
 						shippingAddress: subscription.beneficiary.address+', '+subscription.beneficiary.address2+', '+subscription.beneficiary.city,
@@ -114,6 +116,16 @@ exports.attemptPaymentBySubscription = async function (idSubscription, attempts)
 					installments: 1,
 					amount: subscription.unitAmount,
 				}, errorStatus);
+
+				await sendMailSuccessfull({
+					to: subscription.customer.emailAddress,
+					"type": "html",
+					"subject": "Problema con el pago",
+					"customFrom": "drojas@digevo.com",
+					"fromName": "RyK",
+					idAccount: subscription.account.idAccount,
+					"operation": "PROBLEMPAYMENT"
+				});
 
 				const configTotalAttempts = await getConfigByCode(CONFIG_CODES.PAYMENT_NUMBER_OF_ATTEMPTS);
 				const totalAttempts = Number(configTotalAttempts.value);

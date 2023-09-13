@@ -24,8 +24,10 @@ exports.paymentAPICollect = async function (transbankUser, amount, idSubscriptio
 				headers: { Authorization: `Bearer ${token}` },
 			}
 		);
+		console.log('data paymentAPICollect',data)
 		return {isOk:true,payment:data};
 	} catch (error) {
+		console.error('error paymentAPICollect',error)
 		return {isOk:false,payment:error.response.data};
 	}
 };
@@ -59,12 +61,14 @@ exports.paymentAPINotify = async function (idSubscription, payment, statusRespon
 
 		if (response?.data) {
 			const { statusCode, content } = response.data;
+			console.log({content})
 			if (statusCode === 200) return content;
 		}
+		console.log('content paymentAPINotify',response)
 		//throw new Error("Error API /subscription/make_payment");
 		return false;
 	} catch (error) {
-		console.error(error);
+		console.error('error paymentAPINotify',error);
 		//throw error;
 		return false;
 	}
@@ -72,11 +76,16 @@ exports.paymentAPINotify = async function (idSubscription, payment, statusRespon
 
 exports.sendMailSuccessfull = async function (bodyEmail) {
 	try {
+		//bodyEmail.to = 'favio@resit.cl'
+		console.log({bodyEmail})
+
 		const response = await InstanceAPI.post(
 			"/subscription/send_email?code=FtlIXQZ64Dbl7rcuGrvI8DHemNlkZcjd0c9TpdmsVHgBAzFuFR2hHw==",
-			bodyEmail
+			bodyEmail,
+			{ headers: { Authorization: "Bearer ADJKDFJKJF52554FKJDKJKIF---**FJHDJHJDHJHDJHDKLF5" } }
 		);
 
+		console.log(response);
 		if (response?.data) {
 			const { statusCode, content } = response.data;
 			if (statusCode === 200) return content;
@@ -85,6 +94,8 @@ exports.sendMailSuccessfull = async function (bodyEmail) {
 		return false;
 	} catch (error) {
 		//throw error;
+		console.error(error);
 		return false;
 	}
 };
+
