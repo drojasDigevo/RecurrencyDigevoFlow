@@ -72,9 +72,9 @@ exports.createShipmentBySubscription = async function (idSubscription, attempts 
 
 				return;
 			} else {
-				const shipmentFailMax = await findOneByCode(CONFIG_CODES.SHIPMENT_FAIL_MAX);
-				const shipmentFailFrequency = await findOneByCode(CONFIG_CODES.SHIPMENT_FAIL_FREQUENCY);
-				const shipmentFailUom = await findOneByCode(CONFIG_CODES.SHIPMENT_FAIL_UOM);
+				const { value: shipmentFailMax } = await findOneByCode(CONFIG_CODES.SHIPMENT_FAIL_MAX);
+				const { value: shipmentFailFrequency } = await findOneByCode(CONFIG_CODES.SHIPMENT_FAIL_FREQUENCY);
+				const { value: shipmentFailUom } = await findOneByCode(CONFIG_CODES.SHIPMENT_FAIL_UOM);
 				if (isNaN(attempts)) attempts = 1;
 				else attempts++;
 				if (attempts > shipmentFailMax) {
