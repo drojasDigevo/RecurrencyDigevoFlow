@@ -30,7 +30,7 @@ exports.attemptPaymentBySubscription = async function (idSubscription, attempts)
 	try {
 		const subscription = await verifySubscriptionStatus(idSubscription);
 		if (subscription) {
-			const {isOk,payment} = await paymentAPICollect(
+			const { isOk, payment } = await paymentAPICollect(
 				subscription.paymentMethod.gatewayToken,
 				subscription.unitAmount,
 				idSubscription
@@ -40,7 +40,10 @@ exports.attemptPaymentBySubscription = async function (idSubscription, attempts)
 				const { _id: paymentId } = await createPayment({ ...payment, idSubscription });
 				await createSuccessLog(idSubscription, "Se creó el cobro", { paymentId });
 
-				const notified = await paymentAPINotify(idSubscription, payment, {status:'approved',status_detail:'Approved detail'});
+				const notified = await paymentAPINotify(idSubscription, payment, {
+					status: "approved",
+					status_detail: "Approved detail",
+				});
 				if (notified) {
 					await createSuccessLog(idSubscription, "Se notificó a la API de cobros", { paymentId });
 
@@ -83,11 +86,16 @@ exports.attemptPaymentBySubscription = async function (idSubscription, attempts)
 						document: subscription.customer.identification,
 						fullValuePlan: subscription.totalAmountToPay,
 						//nextCollectionDate: payment.next_payment_date,
-						nextCollectionDate: moment().add(1,'minutes').format("YYYY-MM-DD HH:mm:ss"),
+						nextCollectionDate: moment().add(1, "minutes").format("YYYY-MM-DD HH:mm:ss"),
 						dateofpayment: moment().format("DD/MM/YYYY"),
 						numberOfInstallments: " 2 de 2",
 						plan: subscription.description,
-						shippingAddress: subscription.beneficiary.address+', '+subscription.beneficiary.address2+', '+subscription.beneficiary.city,
+						shippingAddress:
+							subscription.beneficiary.address +
+							", " +
+							subscription.beneficiary.address2 +
+							", " +
+							subscription.beneficiary.city,
 					},
 					idAccount: subscription.account.idAccount,
 					operation: "SUCCESSFULPAYMENT",
@@ -99,32 +107,36 @@ exports.attemptPaymentBySubscription = async function (idSubscription, attempts)
 					status: payment.status || "rejected",
 					status_detail: payment.status_detail || "Failed detail",
 				};
-				errorStatus.status = errorStatus.status+'';
-				errorStatus.status_detail = errorStatus.status_detail+'';
-				await paymentAPINotify(idSubscription, {
-					id_user_external: subscription.paymentMethod.idUserExternal,
-					auth_code: subscription.paymentMethod.authCode,
-					card_type: subscription.paymentMethod.cardType,
-					expMonth: "",
-					expYear: "",
-					last_four: subscription.paymentMethod.lastFour,
-					cardCategory: "",
-					source: subscription.paymentMethod.paymentType,
-					commerce_code: subscription.paymentMethod.commerceCode,
-					transbank_user: subscription.paymentMethod.gatewayToken,
-					payment_date: moment().format("YYYY-MM-DD HH:mm:ss"),
-					installments: 1,
-					amount: subscription.unitAmount,
-				}, errorStatus);
+				errorStatus.status = errorStatus.status + "";
+				errorStatus.status_detail = errorStatus.status_detail + "";
+				await paymentAPINotify(
+					idSubscription,
+					{
+						id_user_external: subscription.paymentMethod.idUserExternal,
+						auth_code: subscription.paymentMethod.authCode,
+						card_type: subscription.paymentMethod.cardType,
+						expMonth: "",
+						expYear: "",
+						last_four: subscription.paymentMethod.lastFour,
+						cardCategory: "",
+						source: subscription.paymentMethod.paymentType,
+						commerce_code: subscription.paymentMethod.commerceCode,
+						transbank_user: subscription.paymentMethod.gatewayToken,
+						payment_date: moment().format("YYYY-MM-DD HH:mm:ss"),
+						installments: 1,
+						amount: subscription.unitAmount,
+					},
+					errorStatus
+				);
 
 				await sendMailSuccessfull({
 					to: subscription.customer.emailAddress,
-					"type": "html",
-					"subject": "Problema con el pago",
-					"customFrom": "drojas@digevo.com",
-					"fromName": "RyK",
+					type: "html",
+					subject: "Problema con el pago",
+					customFrom: "drojas@digevo.com",
+					fromName: "RyK",
 					idAccount: subscription.account.idAccount,
-					"operation": "PROBLEMPAYMENT"
+					operation: "PROBLEMPAYMENT",
 				});
 
 				const configTotalAttempts = await getConfigByCode(CONFIG_CODES.PAYMENT_NUMBER_OF_ATTEMPTS);

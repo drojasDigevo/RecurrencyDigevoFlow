@@ -1,46 +1,59 @@
-const { ObjectId } = require("mongodb")
-const database = require("../database/mongodb")
-const { momentUTC } = require("./dates")
+const { ObjectId } = require("mongodb");
+const database = require("../database/mongodb");
+const { momentUTC } = require("./dates");
+
+exports.findOneByCode = async function (code) {
+	try {
+		const collection = database.collection("config");
+		const response = await collection.findOne({ code: code });
+		return response;
+	} catch (error) {
+		console.error(error);
+	}
+};
 
 exports.insertOne = async function (COLLECTION, data) {
-    try {
-        const collection = database.collection(COLLECTION)
-        const response = await collection.insertOne({ ...data, createdAt: momentUTC(), updatedAt: momentUTC() })
-        return response
-    } catch (error) {
-        console.error(error)
-    }
-}
+	try {
+		const collection = database.collection(COLLECTION);
+		const response = await collection.insertOne({ ...data, createdAt: momentUTC(), updatedAt: momentUTC() });
+		return response;
+	} catch (error) {
+		console.error(error);
+	}
+};
 
 exports.updateOne = async function (COLLECTION, id, newData) {
-    try {
-        const collection = database.collection(COLLECTION)
-        const response = await collection.updateOne({ _id: new ObjectId(id) }, { $set: { ...newData, updatedAt: momentUTC() } })
-        return response
-    } catch (error) {
-        console.error(error)
-    }
-}
+	try {
+		const collection = database.collection(COLLECTION);
+		const response = await collection.updateOne(
+			{ _id: new ObjectId(id) },
+			{ $set: { ...newData, updatedAt: momentUTC() } }
+		);
+		return response;
+	} catch (error) {
+		console.error(error);
+	}
+};
 
 exports.updateOneFilter = async function (COLLECTION, filter, newData) {
-    try {
-        const collection = database.collection(COLLECTION)
-        const response = await collection.updateOne(filter, { $set: { ...newData, updatedAt: momentUTC() } })
-        return response
-    } catch (error) {
-        console.error(error)
-    }
-}
+	try {
+		const collection = database.collection(COLLECTION);
+		const response = await collection.updateOne(filter, { $set: { ...newData, updatedAt: momentUTC() } });
+		return response;
+	} catch (error) {
+		console.error(error);
+	}
+};
 
 exports.updateManyFilter = async function (COLLECTION, filter, newData) {
-    try {
-        const collection = database.collection(COLLECTION)
-        const response = await collection.updateMany(filter, { $set: { ...newData, updatedAt: momentUTC() } })
-        return response
-    } catch (error) {
-        console.error(error)
-    }
-}
+	try {
+		const collection = database.collection(COLLECTION);
+		const response = await collection.updateMany(filter, { $set: { ...newData, updatedAt: momentUTC() } });
+		return response;
+	} catch (error) {
+		console.error(error);
+	}
+};
 
 /**
  * Busqueda con paginacion
@@ -53,45 +66,45 @@ exports.updateManyFilter = async function (COLLECTION, filter, newData) {
  * @returns Listado paginado
  */
 exports.findWithPagination = async function (COLLECTION, filter, project, sort, page, perPage) {
-    try {
-        const usePage = page ? page : 1
-        const usePerPage = perPage ? perPage : 10
-        const useProject = project ? project : {}
-        const useSort = sort ? sort : {}
+	try {
+		const usePage = page ? page : 1;
+		const usePerPage = perPage ? perPage : 10;
+		const useProject = project ? project : {};
+		const useSort = sort ? sort : {};
 
-        const collection = database.collection(COLLECTION)
+		const collection = database.collection(COLLECTION);
 
-        const totalDocuments = await collection.countDocuments(filter)
-        const totalPages = Math.ceil(totalDocuments / usePerPage)
+		const totalDocuments = await collection.countDocuments(filter);
+		const totalPages = Math.ceil(totalDocuments / usePerPage);
 
-        const items = await collection
-            .find(filter)
-            .project(useProject)
-            .sort(useSort)
-            .skip((usePage - 1) * usePerPage)
-            .limit(usePerPage)
-            .toArray()
+		const items = await collection
+			.find(filter)
+			.project(useProject)
+			.sort(useSort)
+			.skip((usePage - 1) * usePerPage)
+			.limit(usePerPage)
+			.toArray();
 
-        return { totalDocuments, totalPages, page: usePage, perPage: usePerPage, documents: items }
-    } catch (error) {
-        console.error(error)
-    }
-}
+		return { totalDocuments, totalPages, page: usePage, perPage: usePerPage, documents: items };
+	} catch (error) {
+		console.error(error);
+	}
+};
 
 exports.verifyCreateIndex = async function (COLLECTION, indexName) {
-    try {
-        const collection = database.collection(COLLECTION)
-        const indexes = await collection.listIndexes().toArray()
-        const exists = indexes.some((eIndex) => {
-            return eIndex.key.hasOwnProperty(indexName);
-        });
-        const indexData = {}
-        indexData[indexName] = 1
-        if (!exists) {
-            collection.createIndex({...indexData})
-        }
-        return exists
-    } catch (error) {
-        console.error(error)
-    }
-}
+	try {
+		const collection = database.collection(COLLECTION);
+		const indexes = await collection.listIndexes().toArray();
+		const exists = indexes.some((eIndex) => {
+			return eIndex.key.hasOwnProperty(indexName);
+		});
+		const indexData = {};
+		indexData[indexName] = 1;
+		if (!exists) {
+			collection.createIndex({ ...indexData });
+		}
+		return exists;
+	} catch (error) {
+		console.error(error);
+	}
+};
