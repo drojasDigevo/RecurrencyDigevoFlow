@@ -6,6 +6,7 @@ const { shipmentAPICreate, shipmentAPINotify } = require("../api/shipments");
 const { createErrorLog, createSuccessLog, createInfoLog } = require("./logs");
 const { convertUTC } = require("../utils/dates");
 const { CONFIG_CODES } = require("../utils/constants");
+const { sendMailSuccessfull } = require("../api/payments");
 
 const COLLECTION = "shipments";
 const collection = client.collection(COLLECTION);
@@ -69,6 +70,27 @@ exports.createShipmentBySubscription = async function (idSubscription, attempts 
                 } else {
                     await createInfoLog(idSubscription, "No hay mas despachos en esta suscripción", { frequency: subscription.frequency, totalShipments: shipments.length })
                 }*/
+
+				await sendMailSuccessfull({
+					to: subscription.customer.emailAddress,
+					type: "html",
+					subject: "Despacho programado",
+					customFrom: "drojas@digevo.com",
+					fromName: "RyK",
+					body: {
+						customer: subscription.customer.firstName + " " + subscription.customer.lastName,
+						document: subscription.customer.identification,
+						plan: subscription.description,
+						shippingAddress:
+							subscription.beneficiary.address +
+							", " +
+							subscription.beneficiary.address2 +
+							", " +
+							subscription.beneficiary.city,
+					},
+					idAccount: subscription.account.idAccount,
+					operation: "DISPATCH",
+				});
 
 				return;
 			} else {

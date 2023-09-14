@@ -88,7 +88,7 @@ exports.attemptPaymentBySubscription = async function (idSubscription, attempts)
 						//nextCollectionDate: payment.next_payment_date,
 						nextCollectionDate: moment().add(1, "minutes").format("YYYY-MM-DD HH:mm:ss"),
 						dateofpayment: moment().format("DD/MM/YYYY"),
-						numberOfInstallments: " 2 de 2",
+						numberOfInstallments: "1 de 1",
 						plan: subscription.description,
 						shippingAddress:
 							subscription.beneficiary.address +
