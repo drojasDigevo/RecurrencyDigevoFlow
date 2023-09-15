@@ -97,7 +97,6 @@ exports.attemptPaymentBySubscription = async function (idSubscription, attempts)
 						customer: subscription.customer.firstName + " " + subscription.customer.lastName,
 						document: subscription.customer.identification,
 						fullValuePlan: subscription.totalAmountToPay,
-						//nextCollectionDate: payment.next_payment_date,
 						nextCollectionDate: nextDate,
 						dateofpayment: moment().format("DD/MM/YYYY"),
 						numberOfInstallments: "1 de 1",

@@ -103,6 +103,10 @@ exports.createShipmentBySubscription = async function (idSubscription, attempts 
 					return await createErrorLog(idSubscription, "Se hizo el máximo de reintentos en despacho");
 				}
 				const newAttempDate = moment().add(shipmentFailFrequency, shipmentFailUom).toDate();
+				// TO FIX: Esto es temporal, para acelerar el proceso de pruebas
+				if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 1) {
+					newAttempDate = moment().add(1, "minutes").toDate();
+				}
 				await createEvent(EventType.SHIPMENT_DISPATCHED, { idSubscription, attempts }, newAttempDate);
 				await createErrorLog(idSubscription, "Ocurrio un error inesperado al crear el despacho", {
 					shipment: err instanceof Error ? shipment.toString() : JSON.stringify(shipment),
