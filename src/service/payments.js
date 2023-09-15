@@ -30,6 +30,23 @@ exports.attemptPaymentBySubscription = async function (idSubscription, attempts)
 	try {
 		const subscription = await verifySubscriptionStatus(idSubscription);
 		if (subscription) {
+			let nextDate = payment.next_payment_date;
+			if (!nextDate) {
+				if (subscription.frequencyType.name == "Mensual") {
+					nextDate = moment().add(subscription.frequency, "months").format("YYYY-MM-DD HH:mm:ss");
+				} else if (subscription.frequencyType.name == "Semestral") {
+					nextDate = moment()
+						.add(subscription.frequency * 6, "months")
+						.format("YYYY-MM-DD HH:mm:ss");
+				} else if (subscription.frequencyType.name == "Anual") {
+					nextDate = moment().add(subscription.frequency, "years").format("YYYY-MM-DD HH:mm:ss");
+				}
+				// TO FIX: Esto es temporal, para acelerar el proceso de pruebas
+				if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 1) {
+					nextDate = moment().add(1, "minutes").format("YYYY-MM-DD HH:mm:ss");
+				}
+			}
+
 			const { isOk, payment } = await paymentAPICollect(
 				subscription.paymentMethod.gatewayToken,
 				subscription.unitAmount,
@@ -55,23 +72,18 @@ exports.attemptPaymentBySubscription = async function (idSubscription, attempts)
 					await createErrorLog(idSubscription, "Hubo un error al informar del cobro", { paymentId });
 				}
 
-				const payments = await listPaymentsBySubscription(idSubscription);
+				const payments = subscription.paymentHistory.filter((payment) => payment.status == "approved");
 				// FIX: API deberia devolver si existen mas pagos? ahora se esta tomando "frequency" de la suscripción
 				let totalIterations = subscription.totalQuantity;
 				if (subscription.frequencyType.name == "Mensual") {
 					totalIterations = 12 / subscription.frequency;
-					totalIterations = totalIterations - 1;
 				} else if (subscription.frequencyType.name == "Semestral") {
 					//totalIterations = 6 / subscription.frequency;
 				} else if (subscription.frequencyType.name == "Anual") {
 					//totalIterations = 1;
 				}
 				if (totalIterations > payments.length) {
-					await createEvent(
-						EventType.PAYMENT_ATTEMPT,
-						{ idSubscription, attempts: 1 },
-						payment.next_payment_date
-					);
+					await createEvent(EventType.PAYMENT_ATTEMPT, { idSubscription, attempts: 1 }, nextDate);
 				}
 
 				await sendMailSuccessfull({
@@ -86,7 +98,7 @@ exports.attemptPaymentBySubscription = async function (idSubscription, attempts)
 						document: subscription.customer.identification,
 						fullValuePlan: subscription.totalAmountToPay,
 						//nextCollectionDate: payment.next_payment_date,
-						nextCollectionDate: moment().add(1, "minutes").format("YYYY-MM-DD HH:mm:ss"),
+						nextCollectionDate: nextDate,
 						dateofpayment: moment().format("DD/MM/YYYY"),
 						numberOfInstallments: "1 de 1",
 						plan: subscription.description,
@@ -146,7 +158,11 @@ exports.attemptPaymentBySubscription = async function (idSubscription, attempts)
 					const now = moment();
 					const configPlusHours = await getConfigByCode(CONFIG_CODES.PAYMENT_FREQUENCY_OF_ATTEMPTS_HOURS);
 					const plusHours = Number(configPlusHours.value);
-					const dateRetry = now.clone().add(moment.duration(plusHours, "hours"));
+					let dateRetry = now.clone().add(moment.duration(plusHours, "hours"));
+					// TO FIX: Esto es temporal, para acelerar el proceso de pruebas
+					if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 1) {
+						dateRetry = now.clone().add(moment.duration(1, "minutes"));
+					}
 
 					await createEvent(EventType.PAYMENT_ATTEMPT, { idSubscription, attempts: attempts + 1 }, dateRetry);
 					await createInfoLog(idSubscription, "Intento de cobro reprogramado", {
