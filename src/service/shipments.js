@@ -134,7 +134,7 @@ exports.createShipmentBySubscription = async function (idSubscription, attempts 
 				if (attempts > shipmentFailMax) {
 					return await createErrorLog(idSubscription, "Se hizo el máximo de reintentos en despacho");
 				}
-				const newAttempDate = moment().add(shipmentFailFrequency, shipmentFailUom).toDate();
+				let newAttempDate = moment().add(shipmentFailFrequency, shipmentFailUom).toDate();
 				// TO FIX: Esto es temporal, para acelerar el proceso de pruebas
 				if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 1) {
 					newAttempDate = moment().add(5, "minutes").toDate();
