@@ -118,6 +118,7 @@ exports.attemptPaymentBySubscription = async function (idSubscription, attempts)
 					status: payment.status || "rejected",
 					status_detail: payment.status_detail || "Failed detail",
 				};
+				if (errorStatus.status == 404) errorStatus.status = "rejected";
 				errorStatus.status = errorStatus.status + "";
 				errorStatus.status_detail = errorStatus.status_detail + "";
 				await paymentAPINotify(
