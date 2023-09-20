@@ -146,7 +146,7 @@ exports.createShipmentBySubscription = async function (idSubscription, attempts 
 				}
 				await createEvent(EventType.SHIPMENT_DISPATCHED, { idSubscription, attempts }, newAttempDate);
 				await createErrorLog(idSubscription, "Ocurrio un error inesperado al crear el despacho", {
-					shipment: err instanceof Error ? shipment.toString() : JSON.stringify(shipment),
+					shipment: shipment instanceof Error ? shipment.toString() : JSON.stringify(shipment),
 				});
 				return await createSuccessLog(idSubscription, "Se reprogramó un nuevo despacho", {
 					delivery_date: convertUTC(newAttempDate),
