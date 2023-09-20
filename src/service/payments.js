@@ -30,7 +30,7 @@ exports.attemptPaymentBySubscription = async function (idSubscription, attempts)
 	try {
 		const subscription = await verifySubscriptionStatus(idSubscription);
 		if (subscription) {
-			let nextDate = payment.next_payment_date;
+			let nextDate = false;
 			if (!nextDate) {
 				if (subscription.frequencyType.name == "Mensual") {
 					nextDate = moment().add(subscription.frequency, "months").format("YYYY-MM-DD HH:mm:ss");
