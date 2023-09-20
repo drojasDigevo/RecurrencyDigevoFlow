@@ -72,20 +72,6 @@ exports.attemptPaymentBySubscription = async function (idSubscription, attempts)
 					await createErrorLog(idSubscription, "Hubo un error al informar del cobro", { paymentId });
 				}
 
-				const payments = subscription.paymentHistory.filter((payment) => payment.status == "approved");
-				// FIX: API deberia devolver si existen mas pagos? ahora se esta tomando "frequency" de la suscripción
-				let totalIterations = subscription.totalQuantity;
-				if (subscription.frequencyType.name == "Mensual") {
-					totalIterations = 12 / subscription.frequency;
-				} else if (subscription.frequencyType.name == "Semestral") {
-					//totalIterations = 6 / subscription.frequency;
-				} else if (subscription.frequencyType.name == "Anual") {
-					//totalIterations = 1;
-				}
-				if (totalIterations > payments.length) {
-					await createEvent(EventType.PAYMENT_ATTEMPT, { idSubscription, attempts: 1 }, nextDate);
-				}
-
 				await sendMailSuccessfull({
 					to: subscription.customer.emailAddress,
 					type: "html",

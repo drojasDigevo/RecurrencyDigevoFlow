@@ -93,6 +93,37 @@ exports.createShipmentBySubscription = async function (idSubscription, attempts 
 					operation: "DISPATCH",
 				});
 
+				let nextDate = false;
+				if (!nextDate) {
+					if (subscription.frequencyType.name == "Mensual") {
+						nextDate = moment().add(subscription.frequency, "months").format("YYYY-MM-DD HH:mm:ss");
+					} else if (subscription.frequencyType.name == "Semestral") {
+						nextDate = moment()
+							.add(subscription.frequency * 6, "months")
+							.format("YYYY-MM-DD HH:mm:ss");
+					} else if (subscription.frequencyType.name == "Anual") {
+						nextDate = moment().add(subscription.frequency, "years").format("YYYY-MM-DD HH:mm:ss");
+					}
+					// TO FIX: Esto es temporal, para acelerar el proceso de pruebas
+					if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 1) {
+						nextDate = moment().add(1, "minutes").format("YYYY-MM-DD HH:mm:ss");
+					}
+				}
+
+				const payments = subscription.paymentHistory.filter((payment) => payment.status == "approved");
+				// FIX: API deberia devolver si existen mas pagos? ahora se esta tomando "frequency" de la suscripción
+				let totalIterations = subscription.totalQuantity;
+				if (subscription.frequencyType.name == "Mensual") {
+					totalIterations = 12 / subscription.frequency;
+				} else if (subscription.frequencyType.name == "Semestral") {
+					//totalIterations = 6 / subscription.frequency;
+				} else if (subscription.frequencyType.name == "Anual") {
+					//totalIterations = 1;
+				}
+				if (totalIterations > payments.length) {
+					await createEvent(EventType.PAYMENT_ATTEMPT, { idSubscription, attempts: 1 }, nextDate);
+				}
+
 				return;
 			} else {
 				const { value: shipmentFailMax } = await findOneByCode(CONFIG_CODES.SHIPMENT_FAIL_MAX);
