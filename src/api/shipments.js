@@ -12,11 +12,9 @@ exports.shipmentAPICreate = async function (idSubscription) {
 			}
 		);
 		console.log("rendir", response);
-		return {
-			data: response?.data || false,
-		};
+		return { isOk: true, data: response?.data };
 	} catch (error) {
-		throw error;
+		return { isOk: false, shipment: error.response.data };
 	}
 };
 
