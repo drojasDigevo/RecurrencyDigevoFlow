@@ -137,17 +137,6 @@ exports.createShipmentBySubscription = async function (idSubscription, attempts 
 			} else {
 				const { isOk, data } = await shipmentAPICreate(idSubscription);
 				if (isOk && data.hasError == false) {
-					await createSuccessLog(idSubscription, "Se notificó a la API del despacho", { shipmentId });
-
-					const shipments = await listShipmentsBySubscription(idSubscription);
-					// FIX: API deberia devolver si existen mas envios? ahora se esta tomando "frequency" de la suscripción
-					/*if (subscription.frequency != shipments.length) {
-						await createEvent(EventType.SHIPMENT_DISPATCHED, { idSubscription }, shipment.delivery_date)
-						await createSuccessLog(idSubscription, "Se reprogramó un nuevo despacho", { delivery_date: convertUTC(shipment.delivery_date) })
-					} else {
-						await createInfoLog(idSubscription, "No hay mas despachos en esta suscripción", { frequency: subscription.frequency, totalShipments: shipments.length })
-					}*/
-
 					await sendMailSuccessfull({
 						to: subscription.customer.emailAddress,
 						type: "html",
@@ -204,7 +193,7 @@ exports.createShipmentBySubscription = async function (idSubscription, attempts 
 				} else {
 					repeat = true;
 					possibleError = data;
-					await createErrorLog(idSubscription, "Hubo un error al informar del despacho", { shipmentId });
+					await createErrorLog(idSubscription, "Hubo un error al informar del despacho");
 				}
 			}
 			if (repeat) {
