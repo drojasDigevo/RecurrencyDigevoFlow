@@ -55,7 +55,7 @@ exports.createShipmentBySubscription = async function (idSubscription, attempts 
 					deliveryStatus: "",
 					locality: "Huechuraba",
 				});
-				if (isOk && shipment.hasError == false) {
+				if (isOk) {
 					const { _id: shipmentId } = await createShipment({ ...shipment, idSubscription });
 					await createSuccessLog(idSubscription, "Se creó el despacho", { shipmentId, shipment });
 
