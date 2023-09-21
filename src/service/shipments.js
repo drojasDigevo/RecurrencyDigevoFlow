@@ -110,7 +110,9 @@ exports.createShipmentBySubscription = async function (idSubscription, attempts 
 							}
 						}
 
-						const payments = subscription.paymentHistory.filter((payment) => payment.status == "approved");
+						const payments = subscription.paymentHistory.filter(
+							(payment) => payment.payStatus == "approved"
+						);
 						// FIX: API deberia devolver si existen mas pagos? ahora se esta tomando "frequency" de la suscripción
 						let totalIterations = subscription.totalQuantity;
 						if (subscription.frequencyType.name == "Mensual") {
@@ -175,7 +177,7 @@ exports.createShipmentBySubscription = async function (idSubscription, attempts 
 						}
 					}
 
-					const payments = subscription.paymentHistory.filter((payment) => payment.status == "approved");
+					const payments = subscription.paymentHistory.filter((payment) => payment.payStatus == "approved");
 					// FIX: API deberia devolver si existen mas pagos? ahora se esta tomando "frequency" de la suscripción
 					let totalIterations = subscription.totalQuantity;
 					if (subscription.frequencyType.name == "Mensual") {
