@@ -9,19 +9,19 @@ exports.createNewPaymentEvent = async function (idSubscription, subscription) {
 	let nextDate = false;
 	if (!nextDate) {
 		if (subscription.frequencyType.name == "Mensual") {
-			nextDate = moment().add(subscription.frequency, "months");
+			nextDate = moment(subscription.startDate).add(subscription.frequency, "months");
 			if (nextDate.date() < 25) {
-				nextDate = moment().add(subscription.frequency - 1, "months");
+				nextDate = moment(subscription.startDate).add(subscription.frequency - 1, "months");
 			}
 			nextDate.date(25);
 		} else if (subscription.frequencyType.name == "Semestral") {
-			nextDate = moment().add(subscription.frequency * 6, "months");
+			nextDate = moment(subscription.startDate).add(subscription.frequency * 6, "months");
 			if (nextDate.date() < 25) {
-				nextDate = moment().add(subscription.frequency * 6 - 1, "months");
+				nextDate = moment(subscription.startDate).add(subscription.frequency * 6 - 1, "months");
 			}
 			nextDate.date(25);
 		} else if (subscription.frequencyType.name == "Anual") {
-			nextDate = moment().add(subscription.frequency, "years");
+			nextDate = moment(subscription.startDate).add(subscription.frequency, "years");
 			nextDate.date(25);
 		}
 		nextDate = nextDate.format("YYYY-MM-DD HH:mm:ss");

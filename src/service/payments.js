@@ -33,13 +33,17 @@ exports.attemptPaymentBySubscription = async function (idSubscription, attempts)
 			let nextDate = false;
 			if (!nextDate) {
 				if (subscription.frequencyType.name == "Mensual") {
-					nextDate = moment().add(subscription.frequency, "months").format("YYYY-MM-DD HH:mm:ss");
+					nextDate = moment(subscription.startDate)
+						.add(subscription.frequency, "months")
+						.format("YYYY-MM-DD HH:mm:ss");
 				} else if (subscription.frequencyType.name == "Semestral") {
-					nextDate = moment()
+					nextDate = moment(subscription.startDate)
 						.add(subscription.frequency * 6, "months")
 						.format("YYYY-MM-DD HH:mm:ss");
 				} else if (subscription.frequencyType.name == "Anual") {
-					nextDate = moment().add(subscription.frequency, "years").format("YYYY-MM-DD HH:mm:ss");
+					nextDate = moment(subscription.startDate)
+						.add(subscription.frequency, "years")
+						.format("YYYY-MM-DD HH:mm:ss");
 				}
 				// TO FIX: Esto es temporal, para acelerar el proceso de pruebas
 				if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 1) {
