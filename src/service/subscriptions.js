@@ -66,6 +66,7 @@ exports.loadSubscriptionFromAPI = async function (idSubscription) {
 
 exports.createInitialEvents = async function (idSubscription) {
 	try {
+		console.log('INICIA CREACION DE EVENTOS SUSCRIPCION',{idSubscription});
 		const subscription = await exports.loadSubscriptionFromAPI(idSubscription);
 		if (subscription) {
 			/*var now = new Date();

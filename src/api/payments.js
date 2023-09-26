@@ -3,6 +3,7 @@ const moment = require("moment-timezone");
 const { createEvent, EventType } = require("../service/events");
 const InstanceAPI = require("../utils/axios");
 const { findOneByCode } = require("../utils/mongodb");
+const { CONFIG_CODES } = require("../utils/constants");
 
 exports.createNewPaymentEvent = async function (idSubscription, subscription) {
 	let nextDate = false;
