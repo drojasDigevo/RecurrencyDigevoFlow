@@ -1,14 +1,63 @@
 const axios = require("axios");
 const moment = require("moment-timezone");
+const { createEvent, EventType } = require("../service/events");
 const InstanceAPI = require("../utils/axios");
+const { findOneByCode } = require("../utils/mongodb");
+
+exports.createNewPaymentEvent = async function (idSubscription, subscription) {
+	let nextDate = false;
+	if (!nextDate) {
+		if (subscription.frequencyType.name == "Mensual") {
+			nextDate = moment().add(subscription.frequency, "months").format("YYYY-MM-DD HH:mm:ss");
+			if (nextDate.date() < 25) {
+				nextDate = moment()
+					.add(subscription.frequency - 1, "months")
+					.format("YYYY-MM-DD HH:mm:ss");
+			}
+			nextDate.date(25);
+		} else if (subscription.frequencyType.name == "Semestral") {
+			nextDate = moment()
+				.add(subscription.frequency * 6, "months")
+				.format("YYYY-MM-DD HH:mm:ss");
+			if (nextDate.date() < 25) {
+				nextDate = moment()
+					.add(subscription.frequency * 6 - 1, "months")
+					.format("YYYY-MM-DD HH:mm:ss");
+			}
+			nextDate.date(25);
+		} else if (subscription.frequencyType.name == "Anual") {
+			nextDate = moment().add(subscription.frequency, "years").format("YYYY-MM-DD HH:mm:ss");
+			nextDate.date(25);
+		}
+		// TO FIX: Esto es temporal, para acelerar el proceso de pruebas
+		if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 1) {
+			nextDate = moment().add(1, "minutes").format("YYYY-MM-DD HH:mm:ss");
+		}
+	}
+
+	const payments = subscription.paymentHistory.filter((payment) => payment.payStatus == "approved");
+	let totalIterations = subscription.totalQuantity;
+	if (subscription.frequencyType.name == "Mensual") {
+		totalIterations = 12 / subscription.frequency;
+	} else if (subscription.frequencyType.name == "Semestral") {
+		totalIterations = 6 / subscription.frequency;
+	} else if (subscription.frequencyType.name == "Anual") {
+		totalIterations = 1;
+	}
+	if (totalIterations > payments.length) {
+		await createEvent(EventType.PAYMENT_ATTEMPT, { idSubscription, attempts: 1 }, nextDate);
+	}
+};
 
 exports.paymentAPICollect = async function (transbankUser, amount, idSubscription) {
 	try {
+		const { value: apiPagoUser } = await findOneByCode(CONFIG_CODES.API_PAGO_USER);
+		const { value: apiPagoPass } = await findOneByCode(CONFIG_CODES.API_PAGO_PASS);
 		const {
 			data: { token },
 		} = await axios.post(`https://api.digevopayments.com/api/login`, {
-			email: "admin@ryk.cl",
-			password: "[KqT7J]LH!q_]U)T",
+			email: apiPagoUser,
+			password: apiPagoPass,
 		});
 		const { data } = await axios.post(
 			`https://api.digevopayments.com/api/jwt/oneclick-mall/pago/${transbankUser}`,
@@ -76,7 +125,6 @@ exports.paymentAPINotify = async function (idSubscription, payment, statusRespon
 
 exports.sendMailSuccessfull = async function (bodyEmail) {
 	try {
-		//bodyEmail.to = 'favio@resit.cl'
 		console.log({ bodyEmail });
 
 		const response = await InstanceAPI.post(

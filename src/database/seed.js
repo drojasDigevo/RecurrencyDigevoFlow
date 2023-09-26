@@ -90,6 +90,20 @@ async function insertSeedData(COSMOS_CONNECTION_STRING, COSMOS_DB_NAME) {
 				createdAt: now,
 				updatedAt: now,
 			},
+			{
+				code: CONFIG_CODES.API_PAGO_USER,
+				label: "API Pago Digevo Usuario",
+				value: "USER",
+				createdAt: now,
+				updatedAt: now,
+			},
+			{
+				code: CONFIG_CODES.API_PAGO_PASS,
+				label: "API Pago Digevo Contraseña",
+				value: "123456",
+				createdAt: now,
+				updatedAt: now,
+			},
 		]);
 		console.log(`${resultConfig.insertedCount} configurations inserted`);
 	} finally {

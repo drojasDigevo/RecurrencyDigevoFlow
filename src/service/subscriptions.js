@@ -2,6 +2,7 @@ const client = require("../database/mongodb");
 const { insertOne, updateOne, findWithPagination, verifyCreateIndex } = require("../utils/mongodb");
 const { getAPISubscription, subscriptionAPILayOff, subscriptionAPIRenewal } = require("../api/subscriptions");
 const { createEvent, EventType, cancelManyEventsBySubscription } = require("./events");
+const { createNewPaymentEvent } = require("../api/payments");
 const { createErrorLog, createSuccessLog, createInfoLog } = require("./logs");
 
 const COLLECTION = "subscriptions";
@@ -67,7 +68,7 @@ exports.createInitialEvents = async function (idSubscription) {
 	try {
 		const subscription = await exports.loadSubscriptionFromAPI(idSubscription);
 		if (subscription) {
-			var now = new Date();
+			/*var now = new Date();
 			var nextDate = new Date();
 			if (subscription.frequencyType.name == "Mensual") {
 				nextDate.setMonth(now.getMonth() + 1 * subscription.frequency);
@@ -87,7 +88,8 @@ exports.createInitialEvents = async function (idSubscription) {
 				EventType.PAYMENT_ATTEMPT,
 				{ idSubscription, attempts: 1 },
 				nextDate
-			);
+			);*/
+			await createNewPaymentEvent(idSubscription, subscription);
 			// TODO: Se comenta temporalmente para invocar desde un pago exitoso
 			//const { _id: eventShipmentId } = await createEvent(EventType.SHIPMENT_DISPATCHED, { idSubscription }, nextDate)
 			await createSuccessLog(idSubscription, "Se crearon eventos iniciales", { eventPaymentId });
