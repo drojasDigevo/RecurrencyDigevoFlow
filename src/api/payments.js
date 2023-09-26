@@ -8,27 +8,22 @@ exports.createNewPaymentEvent = async function (idSubscription, subscription) {
 	let nextDate = false;
 	if (!nextDate) {
 		if (subscription.frequencyType.name == "Mensual") {
-			nextDate = moment().add(subscription.frequency, "months").format("YYYY-MM-DD HH:mm:ss");
+			nextDate = moment().add(subscription.frequency, "months");
 			if (nextDate.date() < 25) {
-				nextDate = moment()
-					.add(subscription.frequency - 1, "months")
-					.format("YYYY-MM-DD HH:mm:ss");
+				nextDate = moment().add(subscription.frequency - 1, "months");
 			}
 			nextDate.date(25);
 		} else if (subscription.frequencyType.name == "Semestral") {
-			nextDate = moment()
-				.add(subscription.frequency * 6, "months")
-				.format("YYYY-MM-DD HH:mm:ss");
+			nextDate = moment().add(subscription.frequency * 6, "months");
 			if (nextDate.date() < 25) {
-				nextDate = moment()
-					.add(subscription.frequency * 6 - 1, "months")
-					.format("YYYY-MM-DD HH:mm:ss");
+				nextDate = moment().add(subscription.frequency * 6 - 1, "months");
 			}
 			nextDate.date(25);
 		} else if (subscription.frequencyType.name == "Anual") {
-			nextDate = moment().add(subscription.frequency, "years").format("YYYY-MM-DD HH:mm:ss");
+			nextDate = moment().add(subscription.frequency, "years");
 			nextDate.date(25);
 		}
+		nextDate = nextDate.format("YYYY-MM-DD HH:mm:ss");
 		// TO FIX: Esto es temporal, para acelerar el proceso de pruebas
 		if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 1) {
 			nextDate = moment().add(1, "minutes").format("YYYY-MM-DD HH:mm:ss");
