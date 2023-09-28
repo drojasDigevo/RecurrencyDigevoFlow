@@ -6,32 +6,34 @@ const { findOneByCode } = require("../utils/mongodb");
 const { CONFIG_CODES } = require("../utils/constants");
 
 exports.createNewPaymentEvent = async function (idSubscription, subscription) {
+	const payments = subscription.paymentHistory.filter((payment) => payment.payStatus == "approved");
+
 	let nextDate = false;
-	if (!nextDate) {
-		if (subscription.frequencyType.name == "Mensual") {
-			nextDate = moment(subscription.startDate).add(subscription.frequency, "months");
-			if (nextDate.date() < 25) {
-				nextDate = moment(subscription.startDate).add(subscription.frequency - 1, "months");
-			}
-			nextDate.date(25);
-		} else if (subscription.frequencyType.name == "Semestral") {
-			nextDate = moment(subscription.startDate).add(subscription.frequency * 6, "months");
-			if (nextDate.date() < 25) {
-				nextDate = moment(subscription.startDate).add(subscription.frequency * 6 - 1, "months");
-			}
-			nextDate.date(25);
-		} else if (subscription.frequencyType.name == "Anual") {
-			nextDate = moment(subscription.startDate).add(subscription.frequency, "years");
-			nextDate.date(25);
+	if (payments.length === 0) {
+		nextDate = moment().add(1, "minutes");
+	} else if (subscription.frequencyType.name == "Mensual") {
+		nextDate = moment(subscription.startDate).date(1).add(subscription.frequency, "months");
+		if (payments.length === 1 && subscription.frequency != 1) {
+			nextDate = moment(subscription.startDate)
+				.date(1)
+				.add(subscription.frequency - 1, "months");
 		}
-		nextDate = nextDate.format("YYYY-MM-DD HH:mm:ss");
-		// TO FIX: Esto es temporal, para acelerar el proceso de pruebas
-		if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 1) {
-			nextDate = moment().add(1, "minutes").format("YYYY-MM-DD HH:mm:ss");
-		}
+		nextDate.date(25);
+	} else if (subscription.frequencyType.name == "Semestral") {
+		nextDate = moment(subscription.startDate)
+			.date(1)
+			.add(subscription.frequency * 6, "months");
+		nextDate.date(25);
+	} else if (subscription.frequencyType.name == "Anual") {
+		nextDate = moment(subscription.startDate).date(1).add(subscription.frequency, "years");
+		nextDate.date(25);
+	}
+	nextDate = nextDate.format("YYYY-MM-DD HH:mm:ss");
+	// TO FIX: Esto es temporal, para acelerar el proceso de pruebas
+	if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 1) {
+		nextDate = moment().add(1, "minutes").format("YYYY-MM-DD HH:mm:ss");
 	}
 
-	const payments = subscription.paymentHistory.filter((payment) => payment.payStatus == "approved");
 	let totalIterations = subscription.totalQuantity;
 	if (subscription.frequencyType.name == "Mensual") {
 		totalIterations = 12 / subscription.frequency;
@@ -42,6 +44,8 @@ exports.createNewPaymentEvent = async function (idSubscription, subscription) {
 	}
 	if (totalIterations > payments.length) {
 		await createEvent(EventType.PAYMENT_ATTEMPT, { idSubscription, attempts: 1 }, nextDate);
+	} else {
+		await createEvent(EventType.SEND_NOTIFICATION, { idSubscription, type: "NOTICE_RENEWAL" }, nextDate);
 	}
 };
 
