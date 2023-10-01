@@ -30,6 +30,11 @@ exports.attemptPaymentBySubscription = async function (idSubscription, attempts)
 	try {
 		const subscription = await verifySubscriptionStatus(idSubscription);
 		if (subscription) {
+			/* Se mueven las lineas de creacion de despacho, siempre debe ejecutarse */
+			const { _id: eventShipmentId } = await createEvent(EventType.SHIPMENT_DISPATCHED, {
+				idSubscription,
+			});
+			await createSuccessLog(idSubscription, "Se crearon nuevos eventos", { eventShipmentId });
 			let nextDate = false;
 			if (!nextDate) {
 				if (subscription.frequencyType.name == "Mensual") {
@@ -67,11 +72,6 @@ exports.attemptPaymentBySubscription = async function (idSubscription, attempts)
 				});
 				if (notified) {
 					await createSuccessLog(idSubscription, "Se notificó a la API de cobros", { paymentId });
-
-					const { _id: eventShipmentId } = await createEvent(EventType.SHIPMENT_DISPATCHED, {
-						idSubscription,
-					});
-					await createSuccessLog(idSubscription, "Se crearon nuevos eventos", { eventShipmentId });
 				} else {
 					await createErrorLog(idSubscription, "Hubo un error al informar del cobro", { paymentId });
 				}
