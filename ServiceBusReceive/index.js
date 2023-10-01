@@ -26,7 +26,7 @@ module.exports = async function (context, message) {
 			await attemptPaymentBySubscription(event.data.idSubscription, event.data.attempts);
 			return;
 		case EventType.SEND_NOTIFICATION:
-			await sendNotification(event.data.idSubscription, event.data.type);
+			await sendNotification(event.data.idSubscription, event.data.type, event.data.attempts);
 			return;
 		default:
 			return;
