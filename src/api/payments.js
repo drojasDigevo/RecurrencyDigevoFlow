@@ -45,7 +45,12 @@ exports.createNewPaymentEvent = async function (idSubscription, subscription) {
 	if (totalIterations > payments.length) {
 		await createEvent(EventType.PAYMENT_ATTEMPT, { idSubscription, attempts: 1 }, nextDate);
 	} else {
-		await createEvent(EventType.SEND_NOTIFICATION, { idSubscription, type: "NOTICE_RENEWAL" }, nextDate);
+		const { value: renewalDays } = await findOneByCode(CONFIG_CODES.RENEWAL_DAYS);
+		await createEvent(
+			EventType.SEND_NOTIFICATION,
+			{ idSubscription, type: "NOTICE_RENEWAL", days: renewalDays },
+			moment(nextDate).add(-parseInt(RENEWAL_DAYS), "days").format("YYYY-MM-DD HH:mm:ss")
+		);
 	}
 };
 

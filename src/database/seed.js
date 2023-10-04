@@ -104,6 +104,13 @@ async function insertSeedData(COSMOS_CONNECTION_STRING, COSMOS_DB_NAME) {
 				createdAt: now,
 				updatedAt: now,
 			},
+			{
+				code: CONFIG_CODES.RENEWAL_DAYS,
+				label: "Renovación de suscripción días",
+				value: 3,
+				createdAt: now,
+				updatedAt: now,
+			},
 		]);
 		console.log(`${resultConfig.insertedCount} configurations inserted`);
 	} finally {

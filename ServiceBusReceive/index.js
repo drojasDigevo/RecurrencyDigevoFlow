@@ -1,5 +1,6 @@
 const { getReceivedEvent, EventType } = require("../src/service/events");
 const { sendNotification } = require("../src/service/notifications");
+const { renewSubscription } = require("../src/service/renew");
 const { attemptPaymentBySubscription } = require("../src/service/payments");
 const { createShipmentBySubscription } = require("../src/service/shipments");
 const { createInitialEvents } = require("../src/service/subscriptions");
@@ -26,7 +27,10 @@ module.exports = async function (context, message) {
 			await attemptPaymentBySubscription(event.data.idSubscription, event.data.attempts);
 			return;
 		case EventType.SEND_NOTIFICATION:
-			await sendNotification(event.data.idSubscription, event.data.type, event.data.attempts);
+			await sendNotification(event.data.idSubscription, event.data.type, event.data.days);
+			return;
+		case EventType.SUBSCRIPTION_RENEW:
+			await renewSubscription(event.data.idSubscription);
 			return;
 		default:
 			return;

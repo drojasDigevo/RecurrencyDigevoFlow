@@ -1,6 +1,7 @@
 const { subscriptionAPISendEmail } = require("../api/subscriptions");
 const { insertOne } = require("../utils/mongodb");
 const { createEvent, EventType } = require("./events");
+const { findOneByCode } = require("../utils/mongodb");
 const { createErrorLog, createSuccessLog } = require("./logs");
 const { loadSubscriptionFromAPI } = require("./subscriptions");
 
@@ -15,12 +16,16 @@ exports.scheduleNotification = async function (idSubscription, type, scheduledDa
 	await createEvent(EventType.SEND_NOTIFICATION, { idSubscription, type }, scheduledDate);
 };
 
-exports.sendNotification = async function (idSubscription, type, attemps = 1) {
+exports.sendNotification = async function (idSubscription, type, days = 3) {
 	try {
 		const subscription = loadSubscriptionFromAPI(idSubscription);
 		if (!subscription) return false;
 
 		const { customer } = subscription;
+
+		days = days - 1;
+		const dateRenewal = moment().add(days, "days");
+		const dateRenewalFormat = dateRenewal.format("DD/MM/YYYY");
 
 		const sendData = {
 			to: customer.emailAddress,
@@ -37,7 +42,7 @@ exports.sendNotification = async function (idSubscription, type, attemps = 1) {
 				customer: customer.firstName + " " + customer.lastName,
 				document: customer.identification,
 				fullValuePlan: subscription.totalAmountToPay,
-				nextCollectionDate: "01/02/2024", //FIX: calcular fecha
+				nextCollectionDate: dateRenewalFormat,
 				numberOfInstallments: " 2 de 2",
 				plan: subscription.description,
 				shippingAddress: customer.address + ", " + customer.address2 + ", " + customer.city,
@@ -50,7 +55,7 @@ exports.sendNotification = async function (idSubscription, type, attemps = 1) {
 				customer: customer.firstName + " " + customer.lastName,
 				document: customer.identification,
 				fullValuePlan: subscription.totalAmountToPay,
-				dateofrenovation: "09/04/2024",
+				dateofrenovation: dateRenewalFormat,
 				numberOfInstallments: " 2 de 2",
 				plan: subscription.description,
 				shippingAddress: customer.address + ", " + customer.address2 + ", " + customer.city,
@@ -66,8 +71,19 @@ exports.sendNotification = async function (idSubscription, type, attemps = 1) {
 				body: sendData,
 			});
 			await createSuccessLog(idSubscription, "Se notificó correctamente", { notificationId });
-			// TODO: si hay otra notificacion crear evento
-			// TODO: si NO hay otra notificacion renovar la suscripción
+			if (days > 0) {
+				await createEvent(
+					EventType.SEND_NOTIFICATION,
+					{ idSubscription, type: "NOTICE_RENEWAL", days: days },
+					moment().add(1, "days").format("YYYY-MM-DD HH:mm:ss")
+				);
+			} else {
+				await createEvent(
+					EventType.SUBSCRIPTION_RENEW,
+					{ idSubscription },
+					moment().add(1, "days").format("YYYY-MM-DD HH:mm:ss")
+				);
+			}
 			return { _id: notificationId };
 		}
 		await createErrorLog(idSubscription, "No se logró notificar", { type, body: sendData });
