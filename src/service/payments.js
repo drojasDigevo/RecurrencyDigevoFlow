@@ -36,24 +36,26 @@ exports.attemptPaymentBySubscription = async function (idSubscription, attempts)
 			});
 			await createSuccessLog(idSubscription, "Se crearon nuevos eventos", { eventShipmentId });
 			let nextDate = false;
-			if (!nextDate) {
-				if (subscription.frequencyType.name == "Mensual") {
-					nextDate = moment(subscription.startDate)
-						.add(subscription.frequency, "months")
-						.format("YYYY-MM-DD HH:mm:ss");
-				} else if (subscription.frequencyType.name == "Semestral") {
-					nextDate = moment(subscription.startDate)
-						.add(subscription.frequency * 6, "months")
-						.format("YYYY-MM-DD HH:mm:ss");
-				} else if (subscription.frequencyType.name == "Anual") {
-					nextDate = moment(subscription.startDate)
-						.add(subscription.frequency, "years")
-						.format("YYYY-MM-DD HH:mm:ss");
-				}
-				// TO FIX: Esto es temporal, para acelerar el proceso de pruebas
-				if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 1) {
-					nextDate = moment().add(1, "minutes").format("YYYY-MM-DD HH:mm:ss");
-				}
+			let qtyPayments = 0;
+			if (subscription.frequencyType.name == "Mensual") {
+				nextDate = moment(subscription.startDate)
+					.add(subscription.frequency, "months")
+					.format("YYYY-MM-DD HH:mm:ss");
+				qtyPayments = 12 / subscription.frequency;
+			} else if (subscription.frequencyType.name == "Semestral") {
+				nextDate = moment(subscription.startDate)
+					.add(subscription.frequency * 6, "months")
+					.format("YYYY-MM-DD HH:mm:ss");
+				qtyPayments = 6 / subscription.frequency;
+			} else if (subscription.frequencyType.name == "Anual") {
+				nextDate = moment(subscription.startDate)
+					.add(subscription.frequency, "years")
+					.format("YYYY-MM-DD HH:mm:ss");
+				qtyPayments = 1;
+			}
+			// TO FIX: Esto es temporal, para acelerar el proceso de pruebas
+			if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 1) {
+				nextDate = moment().add(1, "minutes").format("YYYY-MM-DD HH:mm:ss");
 			}
 
 			const { isOk, payment } = await paymentAPICollect(
@@ -75,6 +77,7 @@ exports.attemptPaymentBySubscription = async function (idSubscription, attempts)
 				} else {
 					await createErrorLog(idSubscription, "Hubo un error al informar del cobro", { paymentId });
 				}
+				const payments = subscription.paymentHistory.filter((payment) => payment.payStatus == "approved");
 
 				await sendMailSuccessfull({
 					to: subscription.customer.emailAddress,
@@ -89,7 +92,7 @@ exports.attemptPaymentBySubscription = async function (idSubscription, attempts)
 						fullValuePlan: subscription.totalAmountToPay,
 						nextCollectionDate: nextDate,
 						dateofpayment: moment().format("DD/MM/YYYY"),
-						numberOfInstallments: "1 de 1",
+						numberOfInstallments: `${payments.length + 1} de ${qtyPayments}`,
 						plan: subscription.description,
 						shippingAddress:
 							subscription.beneficiary.address +
