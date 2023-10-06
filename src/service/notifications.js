@@ -71,18 +71,25 @@ exports.sendNotification = async function (idSubscription, type, days = 3) {
 				body: sendData,
 			});
 			await createSuccessLog(idSubscription, "Se notificó correctamente", { notificationId });
+			let renewalDate = moment().add(1, "days").format("YYYY-MM-DD HH:mm:ss");
+			// TO FIX: Esto es temporal, para acelerar el proceso de pruebas
+			if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 1) {
+				renewalDate = moment().add(1, "minutes").format("YYYY-MM-DD HH:mm:ss");
+			}
+			if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 3) {
+				renewalDate = moment().add(3, "minutes").format("YYYY-MM-DD HH:mm:ss");
+			}
+			if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 6) {
+				renewalDate = moment().add(6, "minutes").format("YYYY-MM-DD HH:mm:ss");
+			}
 			if (days > 0) {
 				await createEvent(
 					EventType.SEND_NOTIFICATION,
 					{ idSubscription, type: "NOTICE_RENEWAL", days: days },
-					moment().add(1, "days").format("YYYY-MM-DD HH:mm:ss")
+					renewalDate
 				);
 			} else {
-				await createEvent(
-					EventType.SUBSCRIPTION_RENEW,
-					{ idSubscription },
-					moment().add(1, "days").format("YYYY-MM-DD HH:mm:ss")
-				);
+				await createEvent(EventType.SUBSCRIPTION_RENEW, { idSubscription }, renewalDate);
 			}
 			return { _id: notificationId };
 		}
