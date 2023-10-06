@@ -52,10 +52,22 @@ exports.createNewPaymentEvent = async function (idSubscription, subscription) {
 		await createEvent(EventType.PAYMENT_ATTEMPT, { idSubscription, attempts: 1 }, nextDate);
 	} else {
 		const { value: renewalDays } = await findOneByCode(CONFIG_CODES.RENEWAL_DAYS);
+		let renewalDate = moment(nextDate).add(-parseInt(renewalDays), "days").format("YYYY-MM-DD HH:mm:ss");
+		// TO FIX: Esto es temporal, para acelerar el proceso de pruebas
+		if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 1) {
+			renewalDate = moment().add(1, "minutes").format("YYYY-MM-DD HH:mm:ss");
+		}
+		if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 3) {
+			renewalDate = moment().add(3, "minutes").format("YYYY-MM-DD HH:mm:ss");
+		}
+		if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 6) {
+			renewalDate = moment().add(6, "minutes").format("YYYY-MM-DD HH:mm:ss");
+		}
+
 		await createEvent(
 			EventType.SEND_NOTIFICATION,
 			{ idSubscription, type: "NOTICE_RENEWAL", days: renewalDays },
-			moment(nextDate).add(-parseInt(renewalDays), "days").format("YYYY-MM-DD HH:mm:ss")
+			renewalDate
 		);
 	}
 };
