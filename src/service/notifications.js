@@ -44,7 +44,7 @@ exports.sendNotification = async function (idSubscription, type, days = 3) {
 				document: customer.identification,
 				fullValuePlan: subscription.totalAmountToPay,
 				nextCollectionDate: dateRenewalFormat,
-				numberOfInstallments: " 2 de 2",
+				numberOfInstallments: "",
 				plan: subscription.description,
 				shippingAddress: customer.address + ", " + customer.address2 + ", " + customer.city,
 			};
@@ -57,7 +57,7 @@ exports.sendNotification = async function (idSubscription, type, days = 3) {
 				document: customer.identification,
 				fullValuePlan: subscription.totalAmountToPay,
 				dateofrenovation: dateRenewalFormat,
-				numberOfInstallments: " 2 de 2",
+				numberOfInstallments: "",
 				plan: subscription.description,
 				shippingAddress: customer.address + ", " + customer.address2 + ", " + customer.city,
 			};
