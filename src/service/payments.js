@@ -111,7 +111,8 @@ exports.attemptPaymentBySubscription = async function (idSubscription, attempts)
 					idSubscription,
 				});
 
-				await createNewPaymentEvent(idSubscription, subscription);
+				const subscriptionNew = await verifySubscriptionStatus(idSubscription);
+				await createNewPaymentEvent(idSubscription, subscriptionNew);
 				await createSuccessLog(idSubscription, "Se crearon nuevos eventos", { eventShipmentId });
 			} else {
 				await createInfoLog(idSubscription, "Intento de cobro fallido", { attempts });
