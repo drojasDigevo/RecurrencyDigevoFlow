@@ -1,13 +1,15 @@
 const { verifySubscriptionStatus, renewalSubscription } = require("./subscriptions");
 const { subscriptionAPISendEmail } = require("../api/subscriptions");
+const { createErrorLog, createSuccessLog } = require("./logs");
 
 exports.renewSubscription = async (idSubscription) => {
+	let bodyEmail = {};
 	try {
 		const subscription = await verifySubscriptionStatus(idSubscription);
 		if (subscription) {
 			const { customer } = subscription;
 			await renewalSubscription(idSubscription);
-			await subscriptionAPISendEmail({
+			bodyEmail = {
 				to: customer.emailAddress,
 				type: "html",
 				subject: "Renovación de Suscripción exitosa",
@@ -26,10 +28,12 @@ exports.renewSubscription = async (idSubscription) => {
 				},
 				idAccount: idSubscription,
 				operation: "RENEWALSUBSCRIPTION",
-			});
+			};
+			await subscriptionAPISendEmail(bodyEmail);
+			await createSuccessLog(idSubscription, "Se renovó correctamente", { idSubscription });
 		}
-		await createErrorLog(idSubscription, "No se pudo generar la renovación");
 	} catch (err) {
 		console.error(err);
+		await createErrorLog(idSubscription, "No se pudo generar la renovación", { bodyEmail });
 	}
 };
