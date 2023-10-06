@@ -33,6 +33,12 @@ exports.createNewPaymentEvent = async function (idSubscription, subscription) {
 	if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 1) {
 		nextDate = moment().add(1, "minutes").format("YYYY-MM-DD HH:mm:ss");
 	}
+	if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 3) {
+		nextDate = moment().add(3, "minutes").format("YYYY-MM-DD HH:mm:ss");
+	}
+	if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 6) {
+		nextDate = moment().add(6, "minutes").format("YYYY-MM-DD HH:mm:ss");
+	}
 
 	let totalIterations = subscription.totalQuantity;
 	if (subscription.frequencyType.name == "Mensual") {

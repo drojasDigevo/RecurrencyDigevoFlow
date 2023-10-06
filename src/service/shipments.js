@@ -153,6 +153,12 @@ exports.createShipmentBySubscription = async function (idSubscription, attempts 
 				if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 1) {
 					newAttempDate = moment().add(5, "minutes").toDate();
 				}
+				if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 3) {
+					newAttempDate = moment().add(5, "minutes").toDate();
+				}
+				if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 6) {
+					newAttempDate = moment().add(5, "minutes").toDate();
+				}
 				await createEvent(EventType.SHIPMENT_DISPATCHED, { idSubscription, attempts }, newAttempDate);
 				await createErrorLog(idSubscription, "Ocurrio un error inesperado al crear el despacho", {
 					shipment: possibleError instanceof Error ? possibleError.toString() : JSON.stringify(possibleError),

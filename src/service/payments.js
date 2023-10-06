@@ -57,6 +57,12 @@ exports.attemptPaymentBySubscription = async function (idSubscription, attempts)
 			if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 1) {
 				nextDate = moment().add(1, "minutes").format("YYYY-MM-DD HH:mm:ss");
 			}
+			if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 3) {
+				nextDate = moment().add(3, "minutes").format("YYYY-MM-DD HH:mm:ss");
+			}
+			if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 6) {
+				nextDate = moment().add(6, "minutes").format("YYYY-MM-DD HH:mm:ss");
+			}
 
 			const { isOk, payment } = await paymentAPICollect(
 				subscription.paymentMethod.gatewayToken,
@@ -155,6 +161,12 @@ exports.attemptPaymentBySubscription = async function (idSubscription, attempts)
 					// TO FIX: Esto es temporal, para acelerar el proceso de pruebas
 					if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 1) {
 						dateRetry = now.clone().add(moment.duration(1, "minutes"));
+					}
+					if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 3) {
+						dateRetry = now.clone().add(moment.duration(3, "minutes"));
+					}
+					if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 6) {
+						dateRetry = now.clone().add(moment.duration(6, "minutes"));
 					}
 
 					await createEvent(EventType.PAYMENT_ATTEMPT, { idSubscription, attempts: attempts + 1 }, dateRetry);
