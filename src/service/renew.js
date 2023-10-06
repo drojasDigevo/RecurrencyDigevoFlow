@@ -26,7 +26,7 @@ exports.renewSubscription = async (idSubscription) => {
 					plan: subscription.description,
 					shippingAddress: customer.address + ", " + customer.address2 + ", " + customer.city,
 				},
-				idAccount: idSubscription,
+				idAccount: subscription.account.idAccount,
 				operation: "RENEWALSUBSCRIPTION",
 			};
 			await subscriptionAPISendEmail(bodyEmail);
