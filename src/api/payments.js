@@ -55,7 +55,7 @@ exports.createNewPaymentEvent = async function (idSubscription, subscription) {
 		await createEvent(
 			EventType.SEND_NOTIFICATION,
 			{ idSubscription, type: "NOTICE_RENEWAL", days: renewalDays },
-			moment(nextDate).add(-parseInt(RENEWAL_DAYS), "days").format("YYYY-MM-DD HH:mm:ss")
+			moment(nextDate).add(-parseInt(renewalDays), "days").format("YYYY-MM-DD HH:mm:ss")
 		);
 	}
 };
