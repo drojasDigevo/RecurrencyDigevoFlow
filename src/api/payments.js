@@ -8,11 +8,13 @@ const { CONFIG_CODES } = require("../utils/constants");
 
 exports.createNewPaymentEvent = async function (idSubscription, subscriptionOld) {
 	let subscription = subscriptionOld;
-	try {
-		const subscriptionNew = await verifySubscriptionStatus(idSubscription);
-		subscription = subscriptionNew;
-	} catch (e) {
-		console.error(e);
+	if (typeof verifySubscriptionStatus === "function") {
+		try {
+			const subscriptionNew = await verifySubscriptionStatus(idSubscription);
+			subscription = subscriptionNew;
+		} catch (e) {
+			console.error(e);
+		}
 	}
 	const payments = subscription.paymentHistory.filter((payment) => payment.payStatus == "approved");
 
