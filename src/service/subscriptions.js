@@ -154,6 +154,10 @@ exports.renewalSubscription = async function (idSubscription) {
 		return false;
 	} catch (error) {
 		console.error(error);
+		const errorStr = error.response ? error.response.data : error;
+		await createErrorLog(idSubscription, "Hubo un error en el renovó de la suscripción", {
+			error: JSON.stringify(errorStr),
+		});
 		return error;
 	}
 };
