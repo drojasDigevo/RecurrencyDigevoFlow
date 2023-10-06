@@ -1,6 +1,7 @@
 const axios = require("axios");
 const moment = require("moment-timezone");
 const { createEvent, EventType } = require("../service/events");
+const { createInfoLog } = require("../service/logs");
 const { verifySubscriptionStatus } = require("../service/subscriptions");
 const InstanceAPI = require("../utils/axios");
 const { findOneByCode } = require("../utils/mongodb");
@@ -60,6 +61,7 @@ exports.createNewPaymentEvent = async function (idSubscription, subscriptionOld)
 	}
 	if (totalIterations > payments.length) {
 		await createEvent(EventType.PAYMENT_ATTEMPT, { idSubscription, attempts: 1 }, nextDate);
+		await createInfoLog(idSubscription, "Se creó evento de pago", { nextDate, totalIterations, payments });
 	} else {
 		const { value: renewalDays } = await findOneByCode(CONFIG_CODES.RENEWAL_DAYS);
 		let renewalDate = moment(nextDate).add(-parseInt(renewalDays), "days").format("YYYY-MM-DD HH:mm:ss");
@@ -79,6 +81,7 @@ exports.createNewPaymentEvent = async function (idSubscription, subscriptionOld)
 			{ idSubscription, type: "NOTICE_RENEWAL", days: renewalDays },
 			renewalDate
 		);
+		await createInfoLog(idSubscription, "Se creó evento de renovación", { renewalDate, totalIterations, payments });
 	}
 };
 
