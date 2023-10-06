@@ -9,7 +9,7 @@ const { verifySubscriptionStatus } = require("./subscriptions");
 const COLLECTION = "notifications";
 
 const NotificationType = Object.freeze({
-	NOTICE_RENEWAL: "NOTICERENEWAL",
+	NOTICE_RENEWAL: "NOTICE_RENEWAL",
 	PAYMENT_CONFIRMATION: "PAYMENTCONFIRMATION",
 });
 
@@ -34,7 +34,7 @@ exports.sendNotification = async function (idSubscription, type, days = 3) {
 			type: "html",
 			customFrom: "drojas@digevo.com",
 			fromName: "RyK",
-			idAccount: 1,
+			idAccount: idSubscription,
 		};
 
 		if (type === NotificationType.NOTICE_RENEWAL) {
@@ -101,6 +101,7 @@ exports.sendNotification = async function (idSubscription, type, days = 3) {
 	} catch (error) {
 		await createErrorLog(idSubscription, "Ocurrio un error inesperado al notificar", {
 			name: error.name,
+			type,
 			message: error.message,
 			body: tmpData,
 		});
