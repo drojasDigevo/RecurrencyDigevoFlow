@@ -18,6 +18,7 @@ exports.scheduleNotification = async function (idSubscription, type, scheduledDa
 };
 
 exports.sendNotification = async function (idSubscription, type, days = 3) {
+	let tmpData = {};
 	try {
 		const subscription = await verifySubscriptionStatus(idSubscription);
 		if (!subscription) return false;
@@ -63,6 +64,7 @@ exports.sendNotification = async function (idSubscription, type, days = 3) {
 			};
 			sendData.operation = "PAYMENTCONFIRMATION";
 		}
+		tmpData = sendData;
 
 		const sended = await subscriptionAPISendEmail(sendData);
 		if (sended) {
@@ -100,6 +102,7 @@ exports.sendNotification = async function (idSubscription, type, days = 3) {
 		await createErrorLog(idSubscription, "Ocurrio un error inesperado al notificar", {
 			name: error.name,
 			message: error.message,
+			body: tmpData,
 		});
 		console.error(error);
 	}
