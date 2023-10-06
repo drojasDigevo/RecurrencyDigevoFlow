@@ -1,11 +1,13 @@
 const axios = require("axios");
 const moment = require("moment-timezone");
 const { createEvent, EventType } = require("../service/events");
+const { verifySubscriptionStatus } = require("../service/subscriptions");
 const InstanceAPI = require("../utils/axios");
 const { findOneByCode } = require("../utils/mongodb");
 const { CONFIG_CODES } = require("../utils/constants");
 
-exports.createNewPaymentEvent = async function (idSubscription, subscription) {
+exports.createNewPaymentEvent = async function (idSubscription, subscriptionOld) {
+	const subscription = await verifySubscriptionStatus(idSubscription);
 	const payments = subscription.paymentHistory.filter((payment) => payment.payStatus == "approved");
 
 	let nextDate = false;

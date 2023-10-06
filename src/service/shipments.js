@@ -4,7 +4,6 @@ const { insertOne, verifyCreateIndex, findOneByCode } = require("../utils/mongod
 const { createEvent, EventType } = require("./events");
 const { verifySubscriptionStatus } = require("./subscriptions");
 const { shipmentAPICreate, shipmentAPINotify } = require("../api/shipments");
-const { createNewPaymentEvent } = require("../api/payments");
 const { createErrorLog, createSuccessLog, createInfoLog } = require("./logs");
 const { convertUTC } = require("../utils/dates");
 const { CONFIG_CODES } = require("../utils/constants");
@@ -94,8 +93,6 @@ exports.createShipmentBySubscription = async function (idSubscription, attempts 
 							operation: "DISPATCH",
 						});
 
-						//await createNewPaymentEvent(idSubscription, subscription);
-
 						return;
 					} else {
 						repeat = true;
@@ -129,8 +126,6 @@ exports.createShipmentBySubscription = async function (idSubscription, attempts 
 						idAccount: subscription.account.idAccount,
 						operation: "DISPATCH",
 					});
-
-					//await createNewPaymentEvent(idSubscription, subscription);
 
 					return;
 				} else {
