@@ -20,7 +20,7 @@ module.exports = async function (context, req) {
 			return;
 		}
 
-		const subExists = await findSubscriptionByIdSubscription(idSubscription);
+		/*const subExists = await findSubscriptionByIdSubscription(idSubscription);
 		if (subExists) {
 			context.res.status = 400;
 			context.res.body = {
@@ -28,7 +28,7 @@ module.exports = async function (context, req) {
 				message: `Ya existe una suscripción con idSubscription: ${idSubscription}`,
 			};
 			return;
-		}
+		}*/
 
 		const result = await createSubscription(idSubscription);
 		context.res.status = 200;
