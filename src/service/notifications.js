@@ -4,7 +4,7 @@ const { insertOne } = require("../utils/mongodb");
 const { createEvent, EventType } = require("./events");
 const { findOneByCode } = require("../utils/mongodb");
 const { createErrorLog, createSuccessLog } = require("./logs");
-const { loadSubscriptionFromAPI } = require("./subscriptions");
+const { verifySubscriptionStatus } = require("./subscriptions");
 
 const COLLECTION = "notifications";
 
@@ -19,7 +19,7 @@ exports.scheduleNotification = async function (idSubscription, type, scheduledDa
 
 exports.sendNotification = async function (idSubscription, type, days = 3) {
 	try {
-		const subscription = loadSubscriptionFromAPI(idSubscription);
+		const subscription = await verifySubscriptionStatus(idSubscription);
 		if (!subscription) return false;
 
 		const { customer } = subscription;
