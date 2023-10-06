@@ -5,6 +5,7 @@ const { createEvent, EventType } = require("./events");
 const { verifySubscriptionStatus, cancelSubscription } = require("./subscriptions");
 const { paymentAPICollect, paymentAPINotify, sendMailSuccessfull } = require("../api/payments");
 const { getConfigByCode } = require("./config");
+const { createNewPaymentEvent } = require("../api/payments");
 const { CONFIG_CODES } = require("../utils/constants");
 const { createErrorLog, createSuccessLog, createInfoLog } = require("./logs");
 const { convertUTC } = require("../utils/dates");
@@ -109,6 +110,8 @@ exports.attemptPaymentBySubscription = async function (idSubscription, attempts)
 				const { _id: eventShipmentId } = await createEvent(EventType.SHIPMENT_DISPATCHED, {
 					idSubscription,
 				});
+
+				await createNewPaymentEvent(idSubscription, subscription);
 				await createSuccessLog(idSubscription, "Se crearon nuevos eventos", { eventShipmentId });
 			} else {
 				await createInfoLog(idSubscription, "Intento de cobro fallido", { attempts });

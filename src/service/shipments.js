@@ -94,7 +94,7 @@ exports.createShipmentBySubscription = async function (idSubscription, attempts 
 							operation: "DISPATCH",
 						});
 
-						await createNewPaymentEvent(idSubscription, subscription);
+						//await createNewPaymentEvent(idSubscription, subscription);
 
 						return;
 					} else {
@@ -130,7 +130,7 @@ exports.createShipmentBySubscription = async function (idSubscription, attempts 
 						operation: "DISPATCH",
 					});
 
-					await createNewPaymentEvent(idSubscription, subscription);
+					//await createNewPaymentEvent(idSubscription, subscription);
 
 					return;
 				} else {
