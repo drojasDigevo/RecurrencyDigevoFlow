@@ -34,7 +34,7 @@ exports.sendNotification = async function (idSubscription, type, days = 3) {
 			type: "html",
 			customFrom: "drojas@digevo.com",
 			fromName: "RyK",
-			idAccount: idSubscription,
+			idAccount: subscription.account.idAccount,
 		};
 
 		if (type === NotificationType.NOTICE_RENEWAL) {
