@@ -22,7 +22,8 @@ exports.subscriptionAPISendEmail = async function (body) {
 	try {
 		const response = await InstanceAPI.post(
 			"/subscription/send_email?code=FtlIXQZ64Dbl7rcuGrvI8DHemNlkZcjd0c9TpdmsVHgBAzFuFR2hHw==",
-			body
+			body,
+			{ headers: { Authorization: "Bearer ADJKDFJKJF52554FKJDKJKIF---**FJHDJHJDHJHDJHDKLF5" } }
 		);
 		if (response?.data) {
 			const { statusCode, content } = response.data;
