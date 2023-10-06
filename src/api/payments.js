@@ -7,7 +7,13 @@ const { findOneByCode } = require("../utils/mongodb");
 const { CONFIG_CODES } = require("../utils/constants");
 
 exports.createNewPaymentEvent = async function (idSubscription, subscriptionOld) {
-	const subscription = await verifySubscriptionStatus(idSubscription);
+	let subscription = subscriptionOld;
+	try {
+		const subscriptionNew = await verifySubscriptionStatus(idSubscription);
+		subscription = subscriptionNew;
+	} catch (e) {
+		console.error(e);
+	}
 	const payments = subscription.paymentHistory.filter((payment) => payment.payStatus == "approved");
 
 	let nextDate = false;
