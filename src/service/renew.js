@@ -34,6 +34,9 @@ exports.renewSubscription = async (idSubscription) => {
 		}
 	} catch (err) {
 		console.error(err);
-		await createErrorLog(idSubscription, "No se pudo generar la renovación", { bodyEmail });
+		await createErrorLog(idSubscription, "No se pudo generar la renovación", {
+			bodyEmail,
+			error: JSON.stringify(err),
+		});
 	}
 };

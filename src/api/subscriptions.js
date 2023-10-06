@@ -31,7 +31,7 @@ exports.subscriptionAPISendEmail = async function (body) {
 		}
 		throw new Error("Error API /subscription/send_email");
 	} catch (error) {
-		throw error;
+		throw error.response.data;
 	}
 };
 
