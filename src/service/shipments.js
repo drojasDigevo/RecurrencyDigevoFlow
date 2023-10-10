@@ -91,6 +91,7 @@ exports.createShipmentBySubscription = async function (idSubscription, attempts 
 							},
 							idAccount: subscription.account.idAccount,
 							operation: "DISPATCH",
+							idSubscription: idSubscription,
 						});
 
 						return;
@@ -125,6 +126,7 @@ exports.createShipmentBySubscription = async function (idSubscription, attempts 
 						},
 						idAccount: subscription.account.idAccount,
 						operation: "DISPATCH",
+						idSubscription: idSubscription,
 					});
 
 					return;

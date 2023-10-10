@@ -139,6 +139,12 @@ exports.paymentAPINotify = async function (idSubscription, payment, statusRespon
 					payDate: payment.payment_date,
 					installments: payment.installments,
 					amount: payment.amount,
+					digevoId: payment.digevo_id,
+					email: payment.email,
+					transactionType: payment.transaction_type,
+					idTrx: payment.id_trx,
+					codExternal: payment.cod_external,
+					buyOrder: payment.buy_order,
 				},
 			},
 			{ headers: { Authorization: "Bearer ADJKDFJKJF52554FKJDKJKIF---**FJHDJHJDHJHDJHDKLF5" } }

@@ -28,6 +28,7 @@ exports.renewSubscription = async (idSubscription) => {
 				},
 				idAccount: subscription.account.idAccount,
 				operation: "RENEWALSUBSCRIPTION",
+				idSubscription: idSubscription,
 			};
 			await subscriptionAPISendEmail(bodyEmail);
 			await createSuccessLog(idSubscription, "Se renovó correctamente", { idSubscription });

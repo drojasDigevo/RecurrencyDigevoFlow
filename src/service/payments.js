@@ -105,6 +105,7 @@ exports.attemptPaymentBySubscription = async function (idSubscription, attempts)
 					},
 					idAccount: subscription.account.idAccount,
 					operation: "SUCCESSFULPAYMENT",
+					idSubscription: idSubscription,
 				});
 				/* Se mueven las lineas de creacion de despacho, siempre debe ejecutarse */
 				const { _id: eventShipmentId } = await createEvent(EventType.SHIPMENT_DISPATCHED, {
@@ -152,6 +153,7 @@ exports.attemptPaymentBySubscription = async function (idSubscription, attempts)
 					fromName: "RyK",
 					idAccount: subscription.account.idAccount,
 					operation: "PROBLEMPAYMENT",
+					idSubscription: idSubscription,
 				});
 
 				const configTotalAttempts = await getConfigByCode(CONFIG_CODES.PAYMENT_NUMBER_OF_ATTEMPTS);
