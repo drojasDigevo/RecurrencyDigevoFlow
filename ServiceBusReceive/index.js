@@ -27,7 +27,7 @@ module.exports = async function (context, message) {
 			await attemptPaymentBySubscription(event.data.idSubscription, event.data.attempts);
 			return;
 		case EventType.SEND_NOTIFICATION:
-			await sendNotification(event.data.idSubscription, event.data.type, event.data.days);
+			await sendNotification(event.data.idSubscription, event.data.type, event.data.days, event.data.renewalDate);
 			return;
 		case EventType.SUBSCRIPTION_RENEW:
 			await renewSubscription(event.data.idSubscription);

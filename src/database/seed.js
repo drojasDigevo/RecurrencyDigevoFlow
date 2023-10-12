@@ -111,6 +111,27 @@ async function insertSeedData(COSMOS_CONNECTION_STRING, COSMOS_DB_NAME) {
 				createdAt: now,
 				updatedAt: now,
 			},
+			{
+				code: CONFIG_CODES.RENEWAL_NOTICE_RETRIES,
+				label: "Cantidad de reintentos notificación de renovación",
+				value: 3,
+				createdAt: now,
+				updatedAt: now,
+			},
+			{
+				code: CONFIG_CODES.RENEWAL_RETRIES,
+				label: "Cantidad de reintentos renovación",
+				value: 3,
+				createdAt: now,
+				updatedAt: now,
+			},
+			{
+				code: CONFIG_CODES.RENEWAL_SUCCESS_RETRIES,
+				label: "Cantidad de reintentos renovación exitosa",
+				value: 3,
+				createdAt: now,
+				updatedAt: now,
+			},
 		]);
 		console.log(`${resultConfig.insertedCount} configurations inserted`);
 	} finally {

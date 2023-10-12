@@ -2,7 +2,6 @@ const moment = require("moment");
 const { subscriptionAPISendEmail } = require("../api/subscriptions");
 const { insertOne } = require("../utils/mongodb");
 const { createEvent, EventType } = require("./events");
-const { findOneByCode } = require("../utils/mongodb");
 const { createErrorLog, createSuccessLog } = require("./logs");
 const { verifySubscriptionStatus } = require("./subscriptions");
 
@@ -17,7 +16,7 @@ exports.scheduleNotification = async function (idSubscription, type, scheduledDa
 	await createEvent(EventType.SEND_NOTIFICATION, { idSubscription, type }, scheduledDate);
 };
 
-exports.sendNotification = async function (idSubscription, type, days = 3) {
+exports.sendNotification = async function (idSubscription, type, days = 3, renewalDate = null) {
 	let tmpData = {};
 	try {
 		const subscription = await verifySubscriptionStatus(idSubscription);
@@ -25,8 +24,7 @@ exports.sendNotification = async function (idSubscription, type, days = 3) {
 
 		const { customer } = subscription;
 
-		days = days - 1;
-		const dateRenewal = moment().add(days, "days");
+		const dateRenewal = renewalDate ? moment(renewalDate) : moment();
 		const dateRenewalFormat = dateRenewal.format("DD/MM/YYYY");
 
 		const sendData = {
@@ -75,26 +73,6 @@ exports.sendNotification = async function (idSubscription, type, days = 3) {
 				body: sendData,
 			});
 			await createSuccessLog(idSubscription, "Se notificó correctamente", { notificationId });
-			let renewalDate = moment().add(1, "days").format("YYYY-MM-DD HH:mm:ss");
-			// TO FIX: Esto es temporal, para acelerar el proceso de pruebas
-			if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 1) {
-				renewalDate = moment().add(1, "minutes").format("YYYY-MM-DD HH:mm:ss");
-			}
-			if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 3) {
-				renewalDate = moment().add(3, "minutes").format("YYYY-MM-DD HH:mm:ss");
-			}
-			if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 6) {
-				renewalDate = moment().add(6, "minutes").format("YYYY-MM-DD HH:mm:ss");
-			}
-			if (days > 0) {
-				await createEvent(
-					EventType.SEND_NOTIFICATION,
-					{ idSubscription, type: "NOTICE_RENEWAL", days: days },
-					renewalDate
-				);
-			} else {
-				await createEvent(EventType.SUBSCRIPTION_RENEW, { idSubscription }, renewalDate);
-			}
 			return { _id: notificationId };
 		}
 		await createErrorLog(idSubscription, "No se logró notificar", { type, body: sendData });

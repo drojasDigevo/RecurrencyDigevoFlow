@@ -78,10 +78,11 @@ exports.createNewPaymentEvent = async function (idSubscription, subscriptionOld)
 
 		await createEvent(
 			EventType.SEND_NOTIFICATION,
-			{ idSubscription, type: "NOTICE_RENEWAL", days: renewalDays },
+			{ idSubscription, type: "NOTICE_RENEWAL", days: renewalDays, renewalDate: nextDate },
 			renewalDate
 		);
 		await createInfoLog(idSubscription, "Se creó evento de renovación", { renewalDate, totalIterations, payments });
+		await createEvent(EventType.SUBSCRIPTION_RENEW, { idSubscription }, nextDate);
 	}
 };
 
