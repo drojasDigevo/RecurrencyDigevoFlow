@@ -47,11 +47,13 @@ exports.subscriptionAPIRenewal = async function (idSubscription) {
 		);
 		if (response?.data) {
 			const { statusCode, content } = response.data;
-			if (statusCode === 200) return content;
+			if (statusCode === 200) return { isOk: true, content };
 		}
-		throw new Error("Error API /subscription/detail");
+		//throw new Error("Error API /subscription/detail");
+		return { isOk: false, content: response.data };
 	} catch (error) {
-		throw error;
+		//throw error;
+		return { isOk: false, content: error.response.data };
 	}
 };
 

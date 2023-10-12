@@ -82,7 +82,7 @@ exports.createNewPaymentEvent = async function (idSubscription, subscriptionOld)
 			renewalDate
 		);
 		await createInfoLog(idSubscription, "Se creó evento de renovación", { renewalDate, totalIterations, payments });
-		await createEvent(EventType.SUBSCRIPTION_RENEW, { idSubscription }, nextDate);
+		await createEvent(EventType.SUBSCRIPTION_RENEW, { idSubscription, stage: "", attempt: 0 }, nextDate);
 	}
 };
 

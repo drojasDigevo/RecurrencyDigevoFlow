@@ -36,7 +36,7 @@ module.exports = async function (context, message) {
 			);
 			return;
 		case EventType.SUBSCRIPTION_RENEW:
-			await renewSubscription(event.data.idSubscription);
+			await renewSubscription(event.data.idSubscription, event.data.stage, event.data.attempt);
 			return;
 		default:
 			return;

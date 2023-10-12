@@ -108,7 +108,7 @@ exports.sendNotification = async function (idSubscription, type, days = 3, renew
 				{ idSubscription, type: "NOTICE_RENEWAL", days: days, attempts: attemp + 1, renewalDate },
 				newDate2Notify
 			);
-			await createErrorLog(idSubscription, "No se logró notificar", { type, body: content });
+			await createErrorLog(idSubscription, "No se logró notificar, se agenda reintento", { type, body: content });
 			return false;
 		}
 	} catch (error) {
