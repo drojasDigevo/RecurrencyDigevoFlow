@@ -1,6 +1,7 @@
 const moment = require("moment");
 const { subscriptionAPISendEmail } = require("../api/subscriptions");
-const { insertOne } = require("../utils/mongodb");
+const { insertOne, findOneByCode } = require("../utils/mongodb");
+const { CONFIG_CODES } = require("../utils/constants");
 const { createEvent, EventType } = require("./events");
 const { createErrorLog, createSuccessLog } = require("./logs");
 const { verifySubscriptionStatus } = require("./subscriptions");
@@ -16,11 +17,26 @@ exports.scheduleNotification = async function (idSubscription, type, scheduledDa
 	await createEvent(EventType.SEND_NOTIFICATION, { idSubscription, type }, scheduledDate);
 };
 
-exports.sendNotification = async function (idSubscription, type, days = 3, renewalDate = null) {
+exports.sendNotification = async function (idSubscription, type, days = 3, renewalDate = null, attemp = 0) {
 	let tmpData = {};
 	try {
 		const subscription = await verifySubscriptionStatus(idSubscription);
 		if (!subscription) return false;
+
+		if (subscription.autoRenew !== true) {
+			await createSuccessLog(idSubscription, "No se notifica porque estado de autoRenew no es true", {
+				autoRenew: subscription.autoRenew,
+			});
+			return false;
+		}
+		const { value: renewalNoticeRetries } = await findOneByCode(CONFIG_CODES.RENEWAL_NOTICE_RETRIES);
+		if (renewalNoticeRetries <= attemp) {
+			await createSuccessLog(idSubscription, "No se notifica porque se alcanzó el máximo de reintentos", {
+				renewalNoticeRetries,
+				attemp,
+			});
+			return false;
+		}
 
 		const { customer } = subscription;
 
@@ -65,8 +81,8 @@ exports.sendNotification = async function (idSubscription, type, days = 3, renew
 		}
 		tmpData = sendData;
 
-		const sended = await subscriptionAPISendEmail(sendData);
-		if (sended) {
+		const { isOk, content } = await subscriptionAPISendEmail(sendData);
+		if (isOk) {
 			const { insertedId: notificationId } = await insertOne(COLLECTION, {
 				type,
 				idSubscription,
@@ -74,9 +90,27 @@ exports.sendNotification = async function (idSubscription, type, days = 3, renew
 			});
 			await createSuccessLog(idSubscription, "Se notificó correctamente", { notificationId });
 			return { _id: notificationId };
+		} else {
+			let newDate2Notify = moment().add(1, "days").format("YYYY-MM-DD HH:mm:ss");
+			// TO FIX: Esto es temporal, para acelerar el proceso de pruebas
+			if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 1) {
+				newDate2Notify = moment().add(1, "minutes").format("YYYY-MM-DD HH:mm:ss");
+			}
+			if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 3) {
+				newDate2Notify = moment().add(3, "minutes").format("YYYY-MM-DD HH:mm:ss");
+			}
+			if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 6) {
+				newDate2Notify = moment().add(6, "minutes").format("YYYY-MM-DD HH:mm:ss");
+			}
+
+			await createEvent(
+				EventType.SEND_NOTIFICATION,
+				{ idSubscription, type: "NOTICE_RENEWAL", days: days, attempts: attemp + 1, renewalDate },
+				newDate2Notify
+			);
+			await createErrorLog(idSubscription, "No se logró notificar", { type, body: content });
+			return false;
 		}
-		await createErrorLog(idSubscription, "No se logró notificar", { type, body: sendData });
-		return false;
 	} catch (error) {
 		await createErrorLog(idSubscription, "Ocurrio un error inesperado al notificar", {
 			name: error.name,

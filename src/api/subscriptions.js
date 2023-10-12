@@ -27,11 +27,13 @@ exports.subscriptionAPISendEmail = async function (body) {
 		);
 		if (response?.data) {
 			const { statusCode, content } = response.data;
-			if (statusCode === 200) return content;
+			if (statusCode === 200) return { isOk: true, content };
 		}
-		throw new Error("Error API /subscription/send_email");
+		//throw new Error("Error API /subscription/send_email");
+		return { isOk: false, content: response.data };
 	} catch (error) {
-		throw error.response.data;
+		//throw error.response.data;
+		return { isOk: false, content: error.response.data };
 	}
 };
 

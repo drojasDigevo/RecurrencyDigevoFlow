@@ -107,7 +107,7 @@ async function insertSeedData(COSMOS_CONNECTION_STRING, COSMOS_DB_NAME) {
 			{
 				code: CONFIG_CODES.RENEWAL_DAYS,
 				label: "Renovación de suscripción días",
-				value: 3,
+				value: 30,
 				createdAt: now,
 				updatedAt: now,
 			},
