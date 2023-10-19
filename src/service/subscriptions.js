@@ -5,6 +5,7 @@ const {
 	subscriptionAPILayOff,
 	subscriptionAPIRenewal,
 	subscriptionAPISendEmail,
+	subscriptionAPIMailError
 } = require("../api/subscriptions");
 const { createEvent, EventType, cancelManyEventsBySubscription } = require("./events");
 const { createNewPaymentEvent } = require("../api/payments");
@@ -70,10 +71,12 @@ exports.loadSubscriptionFromAPI = async function (idSubscription) {
 };
 
 exports.createInitialEvents = async function (idSubscription) {
+	let idAccount = 0;
 	try {
 		console.log("INICIA CREACION DE EVENTOS SUSCRIPCION", { idSubscription });
 		const subscription = await exports.loadSubscriptionFromAPI(idSubscription);
 		if (subscription) {
+			idAccount = subscription.account.idAccount;
 			await createNewPaymentEvent(idSubscription, subscription);
 			// TODO: Se comenta temporalmente para invocar desde un pago exitoso
 			//const { _id: eventShipmentId } = await createEvent(EventType.SHIPMENT_DISPATCHED, { idSubscription }, nextDate)
@@ -86,6 +89,7 @@ exports.createInitialEvents = async function (idSubscription) {
 			name: error.name,
 			message: error.message,
 		});
+		await subscriptionAPIMailError(idSubscription, idAccount, "Ocurrio un error inesperado al crear eventos iniciales");
 		return false;
 	}
 };

@@ -77,3 +77,31 @@ exports.subscriptionAPILayOff = async function (idSubscription) {
 		throw error;
 	}
 };
+
+exports.subscriptionAPIMailError = async function (idSubscription,idAccount,observation) {
+	try {
+		const response = await InstanceAPI.post(
+			"/subscription/send_email?code=FtlIXQZ64Dbl7rcuGrvI8DHemNlkZcjd0c9TpdmsVHgBAzFuFR2hHw==",
+			{
+				idSubscription: idSubscription,
+				"to": "drojas@digevo.com",
+				"type": "html",
+				"customFrom": "drojas@digevo.com", 
+				"fromName": "RyK",
+				"idAccount": idAccount,
+				"subject": "Error Sistema recurrencia",
+				"body": {
+					"observation": observation
+				},
+				"operation": "ERRORADMIN"
+			 }
+		);
+		if (response?.data) {
+			const { statusCode, content } = response.data;
+			if (statusCode === 200) return content;
+		}
+		throw new Error("Error API /subscription/send_email");
+	} catch (error) {
+		throw error;
+	}
+};

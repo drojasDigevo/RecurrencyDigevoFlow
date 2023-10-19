@@ -4,6 +4,7 @@ const { insertOne } = require("../utils/mongodb");
 const { createEvent, EventType } = require("./events");
 const { verifySubscriptionStatus, cancelSubscription } = require("./subscriptions");
 const { paymentAPICollect, paymentAPINotify, sendMailSuccessfull } = require("../api/payments");
+const { subscriptionAPIMailError } = require("../api/subscriptions");
 const { getConfigByCode } = require("./config");
 const { createNewPaymentEvent } = require("../api/payments");
 const { CONFIG_CODES } = require("../utils/constants");
@@ -28,9 +29,11 @@ async function listPaymentsBySubscription(idSubscription) {
 }
 
 exports.attemptPaymentBySubscription = async function (idSubscription, attempts) {
+	let idAccount = 0;
 	try {
 		const subscription = await verifySubscriptionStatus(idSubscription);
 		if (subscription) {
+			idAccount = subscription.account.idAccount;
 			let nextDate = false;
 			let qtyPayments = 0;
 			if (subscription.frequencyType.name == "Mensual") {
@@ -187,16 +190,19 @@ exports.attemptPaymentBySubscription = async function (idSubscription, attempts)
 						{ attempts }
 					);
 					await cancelSubscription(idSubscription, true);
+					await subscriptionAPIMailError(idSubscription, idAccount, "Limite de intentos de cobro fallidos, se cancelará la suscripción");
 				}
 			}
 		} else {
 			await createErrorLog(idSubscription, "No se pudo ejecutar el intento de cobro");
+			await subscriptionAPIMailError(idSubscription, idAccount, "No se pudo ejecutar el intento de cobro");
 		}
 	} catch (error) {
 		await createErrorLog(idSubscription, "Ocurrio un error inesperado al ejecutar el cobro", {
 			name: error.name,
 			message: error.message,
 		});
+		await subscriptionAPIMailError(idSubscription, idAccount, "Ocurrio un error inesperado al ejecutar el cobro");
 		console.error(error);
 	}
 };

@@ -4,6 +4,7 @@ const { insertOne, verifyCreateIndex, findOneByCode } = require("../utils/mongod
 const { createEvent, EventType } = require("./events");
 const { verifySubscriptionStatus } = require("./subscriptions");
 const { shipmentAPICreate, shipmentAPINotify } = require("../api/shipments");
+const { subscriptionAPIMailError } = require("../api/subscriptions");
 const { createErrorLog, createSuccessLog, createInfoLog } = require("./logs");
 const { convertUTC } = require("../utils/dates");
 const { CONFIG_CODES } = require("../utils/constants");
@@ -28,12 +29,14 @@ async function listShipmentsBySubscription(idSubscription) {
 }
 
 exports.createShipmentBySubscription = async function (idSubscription, attempts = false) {
+	let idAccount = 0;
 	try {
 		let repeat = false;
 		let possibleError = false;
 		console.log("INICIAR DESPACHO");
 		const subscription = await verifySubscriptionStatus(idSubscription);
 		if (subscription) {
+			idAccount = subscription.account.idAccount;
 			if (!attempts) {
 				const { isOk, shipment } = await shipmentAPINotify(idSubscription, {
 					typeIdentification: 1,
@@ -99,6 +102,7 @@ exports.createShipmentBySubscription = async function (idSubscription, attempts 
 						repeat = true;
 						possibleError = data;
 						await createErrorLog(idSubscription, "Hubo un error al informar del despacho", { shipmentId });
+						await subscriptionAPIMailError(idSubscription, idAccount, "Hubo un error al informar del despacho");
 					}
 				} else {
 					repeat = true;
@@ -134,6 +138,7 @@ exports.createShipmentBySubscription = async function (idSubscription, attempts 
 					repeat = true;
 					possibleError = data;
 					await createErrorLog(idSubscription, "Hubo un error al informar del despacho");
+					await subscriptionAPIMailError(idSubscription, idAccount, "Hubo un error al informar del despacho");
 				}
 			}
 			if (repeat) {
@@ -171,6 +176,7 @@ exports.createShipmentBySubscription = async function (idSubscription, attempts 
 			name: error.name,
 			message: error.message,
 		});
+		await subscriptionAPIMailError(idSubscription, idAccount, "Ocurrio un error inesperado al crear el despacho");
 		console.error(error);
 	}
 };

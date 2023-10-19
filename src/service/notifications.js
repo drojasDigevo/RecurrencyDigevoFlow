@@ -1,5 +1,5 @@
 const moment = require("moment");
-const { subscriptionAPISendEmail } = require("../api/subscriptions");
+const { subscriptionAPISendEmail,subscriptionAPIMailError } = require("../api/subscriptions");
 const { insertOne, findOneByCode } = require("../utils/mongodb");
 const { CONFIG_CODES } = require("../utils/constants");
 const { createEvent, EventType } = require("./events");
@@ -18,11 +18,13 @@ exports.scheduleNotification = async function (idSubscription, type, scheduledDa
 };
 
 exports.sendNotification = async function (idSubscription, type, days = 3, renewalDate = null, attemp = 0) {
+	let idAccount = 0;
 	let tmpData = {};
 	try {
 		const subscription = await verifySubscriptionStatus(idSubscription);
 		if (!subscription) return false;
 
+		idAccount = subscription.account.idAccount;
 		if (subscription.autoRenew !== true) {
 			await createSuccessLog(idSubscription, "No se notifica porque estado de autoRenew no es true", {
 				autoRenew: subscription.autoRenew,
@@ -112,12 +114,13 @@ exports.sendNotification = async function (idSubscription, type, days = 3, renew
 			return false;
 		}
 	} catch (error) {
-		await createErrorLog(idSubscription, "Ocurrio un error inesperado al notificar", {
+		await createErrorLog(idSubscription, "Ocurrio un error inesperado al notificar renovación", {
 			name: error.name,
 			type,
 			message: error.message,
 			body: tmpData,
 		});
 		console.error(error);
+		await subscriptionAPIMailError(idSubscription, idAccount, "Ocurrio un error inesperado al notificar renovación");
 	}
 };

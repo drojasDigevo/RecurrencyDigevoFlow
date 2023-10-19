@@ -1,5 +1,5 @@
 const { verifySubscriptionStatus, renewalSubscription } = require("./subscriptions");
-const { subscriptionAPISendEmail, subscriptionAPIRenewal } = require("../api/subscriptions");
+const { subscriptionAPISendEmail, subscriptionAPIRenewal,subscriptionAPIMailError } = require("../api/subscriptions");
 const { createErrorLog, createSuccessLog } = require("./logs");
 const { createEvent, EventType } = require("../service/events");
 const { findOneByCode } = require("../utils/mongodb");
@@ -7,10 +7,12 @@ const { CONFIG_CODES } = require("../utils/constants");
 const moment = require("moment");
 
 exports.renewSubscription = async (idSubscription, stage = "", attempt = 0) => {
+	let idAccount = 0;
 	let bodyEmail = {};
 	try {
 		const subscription = await verifySubscriptionStatus(idSubscription);
 		if (subscription) {
+			idAccount = subscription.account.idAccount;
 			if (subscription.autoRenew !== true) {
 				await createSuccessLog(idSubscription, "No se notifica porque estado de autoRenew no es true", {
 					autoRenew: subscription.autoRenew,
@@ -32,6 +34,7 @@ exports.renewSubscription = async (idSubscription, stage = "", attempt = 0) => {
 								attempt,
 							}
 						);
+						await subscriptionAPIMailError(idSubscription, idAccount, "No se pudo generar la renovación, no se programa reintento");
 						return false;
 					}
 					await createErrorLog(
@@ -42,6 +45,7 @@ exports.renewSubscription = async (idSubscription, stage = "", attempt = 0) => {
 							attempt,
 						}
 					);
+					await subscriptionAPIMailError(idSubscription, idAccount, "No se pudo generar la renovación, se programa nuevo reintento");
 					let scheduledDate = moment().add(1, "days").format("YYYY-MM-DD HH:mm:ss");
 					// TO FIX: Esto es temporal, para acelerar el proceso de pruebas
 					if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 1) {
@@ -95,6 +99,7 @@ exports.renewSubscription = async (idSubscription, stage = "", attempt = 0) => {
 							attempt,
 						}
 					);
+					await subscriptionAPIMailError(idSubscription, idAccount, "No se pudo generar la notificación de renovación, no se programa reintento");
 					return false;
 				}
 				await createErrorLog(
@@ -123,6 +128,7 @@ exports.renewSubscription = async (idSubscription, stage = "", attempt = 0) => {
 					{ idSubscription, attempt: attempt + 1, stage: "NOTICE" },
 					scheduledDate
 				);
+				await subscriptionAPIMailError(idSubscription, idAccount, "No se pudo generar la notificación de renovación, se programa nuevo reintento de correo");
 				return false;
 			}
 			await createSuccessLog(idSubscription, "Se renovó correctamente siguiendo todo el proceso", {
@@ -135,5 +141,6 @@ exports.renewSubscription = async (idSubscription, stage = "", attempt = 0) => {
 			bodyEmail,
 			error: JSON.stringify(err),
 		});
+		await subscriptionAPIMailError(idSubscription, idAccount, "No se pudo generar la renovación");
 	}
 };
