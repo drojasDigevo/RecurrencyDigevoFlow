@@ -77,12 +77,15 @@ exports.createNewPaymentEvent = async function (idSubscription, subscriptionOld)
 		// TO FIX: Esto es temporal, para acelerar el proceso de pruebas
 		if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 1) {
 			renewalDate = moment().add(1, "minutes").format("YYYY-MM-DD HH:mm:ss");
+			nextDate = moment(renewalDate).add(1, "minutes").format("YYYY-MM-DD HH:mm:ss");
 		}
 		if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 3) {
 			renewalDate = moment().add(3, "minutes").format("YYYY-MM-DD HH:mm:ss");
+			nextDate = moment(renewalDate).add(1, "minutes").format("YYYY-MM-DD HH:mm:ss");
 		}
 		if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 6) {
 			renewalDate = moment().add(6, "minutes").format("YYYY-MM-DD HH:mm:ss");
+			nextDate = moment(renewalDate).add(1, "minutes").format("YYYY-MM-DD HH:mm:ss");
 		}
 
 		await createEvent(
