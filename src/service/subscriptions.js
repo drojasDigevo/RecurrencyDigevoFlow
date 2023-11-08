@@ -30,7 +30,7 @@ exports.SubscriptionStatus = SubscriptionStatus;
  * @param {number} perPage - Cantidad de registros por pagina
  * @returns Listado paginado
  */
-exports.listSubscription = async function (page, perPage) {
+exports.listSubscription = async function (page, perPage, search = false) {
 	try {
 		await verifyCreateIndex(COLLECTION, "updatedAt");
 		const sort = { updatedAt: -1 };
@@ -42,7 +42,9 @@ exports.listSubscription = async function (page, perPage) {
 			"status.name": 1,
 			"customer.emailAddress": 1,
 		};
-		const result = await findWithPagination(COLLECTION, {}, project, sort, page, perPage);
+		const filter = {};
+		if (search) filter.idSubscription = search;
+		const result = await findWithPagination(COLLECTION, filter, project, sort, page, perPage);
 		return result;
 	} catch (error) {
 		console.error(error);
