@@ -19,7 +19,7 @@ module.exports = async function (context, req) {
 			headers: {
 				"Content-Type": "application/json",
 			},
-			body: { ok: true, data: events, condition },
+			body: { ok: true, data: events, condition, search },
 		};
 	} catch (error) {
 		context.res = {
