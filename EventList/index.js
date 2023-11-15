@@ -8,7 +8,7 @@ module.exports = async function (context, req) {
 		if (type) rules.push({ type: EventType[type] });
 		if (status) rules.push({ status: EventStatus[status] });
 		if (idSubscription) rules.push({ "data.idSubscription": idSubscription });
-		if (search) rules.push({ "data.idSubscription": idSubscription });
+		if (search) rules.push({ "data.idSubscription": search });
 
 		let condition = {};
 		if (rules.length > 0) condition = { $and: rules };
@@ -19,7 +19,7 @@ module.exports = async function (context, req) {
 			headers: {
 				"Content-Type": "application/json",
 			},
-			body: { ok: true, data: events, condition, search },
+			body: { ok: true, data: events, condition, search, rules },
 		};
 	} catch (error) {
 		context.res = {
