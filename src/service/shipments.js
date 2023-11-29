@@ -40,27 +40,31 @@ exports.createShipmentBySubscription = async function (idSubscription, attempts 
 			if (!attempts) {
 				const { isOk, shipment } = await shipmentAPINotify(idSubscription, {
 					typeIdentification: 1,
-					identification: subscription.beneficiary.identification,
-					firstName: subscription.beneficiary.firstName,
-					lastName: subscription.beneficiary.lastName,
-					emailAddress: subscription.shippingSummaryHistory?[0]?.emailAddress || subscription.beneficiary.emailAddress,
-					address: subscription.beneficiary.address,
-					address2: subscription.beneficiary.address2,
-					adReference: subscription.beneficiary.adReference,
-					city: subscription.beneficiary.city,
-					country: subscription.beneficiary.country,
-					phoneNumber: subscription.beneficiary.phoneNumber,
-					postalCode: subscription.beneficiary.postalCode,
-					idCourier: "1",
-					courierName: "Chilepost",
-					deliveryDate: "",
-					approvalDelivey: "",
-					deliveryStatus: "",
-					locality: "Huechuraba",
+					identification: subscription.shippingSummaryHistory[0].identification,
+					firstName: subscription.shippingSummaryHistory[0].firstName,
+					lastName: subscription.shippingSummaryHistory[0].lastName,
+					emailAddress: subscription.shippingSummaryHistory[0].emailAddress,
+					address: subscription.shippingSummaryHistory[0].address,
+					address2: subscription.shippingSummaryHistory[0].address2,
+					adReference: subscription.shippingSummaryHistory[0].adReference,
+					city: subscription.shippingSummaryHistory[0].city,
+					country: subscription.shippingSummaryHistory[0].country,
+					phoneNumber: subscription.shippingSummaryHistory[0].phoneNumber,
+					postalCode: subscription.shippingSummaryHistory[0].postalCode,
+					idCourier: subscription.shippingSummaryHistory[0].idCourier,
+					courierName: subscription.shippingSummaryHistory[0].courierName,
+					deliveryDate: subscription.shippingSummaryHistory[0].deliveryDate,
+					approvalDelivey: subscription.shippingSummaryHistory[0].approvalDelivey,
+					deliveryStatus: subscription.shippingSummaryHistory[0].deliveryStatus,
+					locality: subscription.shippingSummaryHistory[0].locality,
 				});
 				if (isOk) {
 					const { _id: shipmentId } = await createShipment({ ...shipment, idSubscription });
-					await createSuccessLog(idSubscription, "Se creó el despacho", { shipmentId, shipment, subscription });
+					await createSuccessLog(idSubscription, "Se creó el despacho", {
+						shipmentId,
+						shipment,
+						subscription,
+					});
 
 					const { isOk, data } = await shipmentAPICreate(idSubscription);
 					if (isOk && data.hasError == false) {
