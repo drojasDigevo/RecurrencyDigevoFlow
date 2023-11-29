@@ -43,7 +43,7 @@ exports.createShipmentBySubscription = async function (idSubscription, attempts 
 					identification: subscription.beneficiary.identification,
 					firstName: subscription.beneficiary.firstName,
 					lastName: subscription.beneficiary.lastName,
-					emailAddress: subscription.beneficiary.emailAddress,
+					emailAddress: subscription.shippingSummaryHistory?[0]?.emailAddress || subscription.beneficiary.emailAddress,
 					address: subscription.beneficiary.address,
 					address2: subscription.beneficiary.address2,
 					adReference: subscription.beneficiary.adReference,
@@ -60,7 +60,7 @@ exports.createShipmentBySubscription = async function (idSubscription, attempts 
 				});
 				if (isOk) {
 					const { _id: shipmentId } = await createShipment({ ...shipment, idSubscription });
-					await createSuccessLog(idSubscription, "Se creó el despacho", { shipmentId, shipment });
+					await createSuccessLog(idSubscription, "Se creó el despacho", { shipmentId, shipment, subscription });
 
 					const { isOk, data } = await shipmentAPICreate(idSubscription);
 					if (isOk && data.hasError == false) {
