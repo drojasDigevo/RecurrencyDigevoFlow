@@ -1,6 +1,6 @@
 const moment = require("moment-timezone");
 const client = require("../database/mongodb");
-const { insertOne } = require("../utils/mongodb");
+const { insertOne, findOneByCode } = require("../utils/mongodb");
 const { createEvent, EventType } = require("./events");
 const { verifySubscriptionStatus, cancelSubscription } = require("./subscriptions");
 const { paymentAPICollect, paymentAPINotify, sendMailSuccessfull } = require("../api/payments");
