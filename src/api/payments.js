@@ -7,9 +7,10 @@ const InstanceAPI = require("../utils/axios");
 const { findOneByCode } = require("../utils/mongodb");
 const { CONFIG_CODES } = require("../utils/constants");
 
-const URL_API = process.env.PAYMENTS_URL_API || 'https://api.digevopayments.com/api';
-const CODE_SUBSCRIPTION = process.env.CODE_SUBSCRIPTION || 'FtlIXQZ64Dbl7rcuGrvI8DHemNlkZcjd0c9TpdmsVHgBAzFuFR2hHw==';
-const BEARER_SUBSCRIPTION = process.env.BEARER_SUBSCRIPTION || 'Bearer ADJKDFJKJF52554FKJDKJKIF---**FJHDJHJDHJHDJHDKLF5';
+const URL_API = process.env.PAYMENTS_URL_API || "https://api.digevopayments.com/api";
+const CODE_SUBSCRIPTION = process.env.CODE_SUBSCRIPTION || "FtlIXQZ64Dbl7rcuGrvI8DHemNlkZcjd0c9TpdmsVHgBAzFuFR2hHw==";
+const BEARER_SUBSCRIPTION =
+	process.env.BEARER_SUBSCRIPTION || "Bearer ADJKDFJKJF52554FKJDKJKIF---**FJHDJHJDHJHDJHDKLF5";
 
 exports.createNewPaymentEvent = async function (idSubscription, subscriptionOld) {
 	const { value: digevoSpeed } = await findOneByCode(CONFIG_CODES.DIGEVO_SPEED);
@@ -23,12 +24,13 @@ exports.createNewPaymentEvent = async function (idSubscription, subscriptionOld)
 		}
 	}
 	const payments = subscription.paymentHistory.filter((payment) => payment.payStatus == "approved");
+	const lastPayment = payments.length > 0 ? payments[payments.length - 1] : false;
 
 	let nextDate = false;
 	if (payments.length === 0) {
 		nextDate = moment().add(1, "minutes");
 	} else if (subscription.frequencyType.name == "Mensual") {
-		nextDate = moment(subscription.startDate).date(1).add(subscription.frequency, "months");
+		nextDate = moment(lastPayment.payDate).date(1).add(subscription.frequency, "months");
 		if (payments.length === 1 && subscription.frequency != 1) {
 			nextDate = moment(subscription.startDate)
 				.date(1)
@@ -36,16 +38,16 @@ exports.createNewPaymentEvent = async function (idSubscription, subscriptionOld)
 		}
 		nextDate.date(25);
 	} else if (subscription.frequencyType.name == "Semestral") {
-		nextDate = moment(subscription.startDate)
+		nextDate = moment(lastPayment.payDate)
 			.date(1)
 			.add(subscription.frequency * 6, "months");
 		nextDate.date(25);
 	} else if (subscription.frequencyType.name == "Anual") {
-		nextDate = moment(subscription.startDate).date(1).add(subscription.frequency, "years");
+		nextDate = moment(lastPayment.payDate).date(1).add(subscription.frequency, "years");
 		nextDate.date(25);
 	}
 	nextDate = nextDate.format("YYYY-MM-DD HH:mm:ss");
-	if(digevoSpeed == "1"){
+	if (digevoSpeed == "1") {
 		// TO FIX: Esto es temporal, para acelerar el proceso de pruebas
 		if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 1) {
 			nextDate = moment().add(1, "minutes").format("YYYY-MM-DD HH:mm:ss");
@@ -81,7 +83,7 @@ exports.createNewPaymentEvent = async function (idSubscription, subscriptionOld)
 	} else {
 		const { value: renewalDays } = await findOneByCode(CONFIG_CODES.RENEWAL_DAYS);
 		let renewalDate = moment(nextDate).add(-parseInt(renewalDays), "days").format("YYYY-MM-DD HH:mm:ss");
-		if(digevoSpeed == "1"){
+		if (digevoSpeed == "1") {
 			// TO FIX: Esto es temporal, para acelerar el proceso de pruebas
 			if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 1) {
 				renewalDate = moment().add(1, "minutes").format("YYYY-MM-DD HH:mm:ss");
@@ -191,11 +193,9 @@ exports.sendMailSuccessfull = async function (bodyEmail) {
 	try {
 		console.log({ bodyEmail });
 
-		const response = await InstanceAPI.post(
-			`/subscription/send_email?code=${CODE_SUBSCRIPTION}`,
-			bodyEmail,
-			{ headers: { Authorization: BEARER_SUBSCRIPTION } }
-		);
+		const response = await InstanceAPI.post(`/subscription/send_email?code=${CODE_SUBSCRIPTION}`, bodyEmail, {
+			headers: { Authorization: BEARER_SUBSCRIPTION },
+		});
 
 		console.log(response);
 		if (response?.data) {
