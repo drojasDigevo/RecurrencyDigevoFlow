@@ -9,6 +9,7 @@ const moment = require("moment");
 exports.renewSubscription = async (idSubscription, stage = "", attempt = 0) => {
 	let bodyEmail = {};
 	try {
+		const { value: digevoSpeed } = await findOneByCode(CONFIG_CODES.DIGEVO_SPEED);
 		const subscription = await verifySubscriptionStatus(idSubscription);
 		if (subscription) {
 			if (subscription.autoRenew !== true) {
@@ -43,15 +44,17 @@ exports.renewSubscription = async (idSubscription, stage = "", attempt = 0) => {
 						}
 					);
 					let scheduledDate = moment().add(1, "days").format("YYYY-MM-DD HH:mm:ss");
-					// TO FIX: Esto es temporal, para acelerar el proceso de pruebas
-					if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 1) {
-						scheduledDate = moment().add(1, "minutes").format("YYYY-MM-DD HH:mm:ss");
-					}
-					if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 3) {
-						scheduledDate = moment().add(3, "minutes").format("YYYY-MM-DD HH:mm:ss");
-					}
-					if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 6) {
-						scheduledDate = moment().add(6, "minutes").format("YYYY-MM-DD HH:mm:ss");
+					if(digevoSpeed == "1"){
+						// TO FIX: Esto es temporal, para acelerar el proceso de pruebas
+						if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 1) {
+							scheduledDate = moment().add(1, "minutes").format("YYYY-MM-DD HH:mm:ss");
+						}
+						if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 3) {
+							scheduledDate = moment().add(3, "minutes").format("YYYY-MM-DD HH:mm:ss");
+						}
+						if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 6) {
+							scheduledDate = moment().add(6, "minutes").format("YYYY-MM-DD HH:mm:ss");
+						}
 					}
 
 					await createEvent(
@@ -106,15 +109,17 @@ exports.renewSubscription = async (idSubscription, stage = "", attempt = 0) => {
 					}
 				);
 				let scheduledDate = moment().add(1, "days").format("YYYY-MM-DD HH:mm:ss");
-				// TO FIX: Esto es temporal, para acelerar el proceso de pruebas
-				if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 1) {
-					scheduledDate = moment().add(1, "minutes").format("YYYY-MM-DD HH:mm:ss");
-				}
-				if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 3) {
-					scheduledDate = moment().add(3, "minutes").format("YYYY-MM-DD HH:mm:ss");
-				}
-				if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 6) {
-					scheduledDate = moment().add(6, "minutes").format("YYYY-MM-DD HH:mm:ss");
+				if(digevoSpeed == "1"){
+					// TO FIX: Esto es temporal, para acelerar el proceso de pruebas
+					if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 1) {
+						scheduledDate = moment().add(1, "minutes").format("YYYY-MM-DD HH:mm:ss");
+					}
+					if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 3) {
+						scheduledDate = moment().add(3, "minutes").format("YYYY-MM-DD HH:mm:ss");
+					}
+					if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 6) {
+						scheduledDate = moment().add(6, "minutes").format("YYYY-MM-DD HH:mm:ss");
+					}
 				}
 
 				if (stage === "") attempt = 0;

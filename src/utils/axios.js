@@ -1,7 +1,8 @@
 const axios = require('axios')
+const URL_API = process.env.DIGEVO_URL_API || 'https://subscriptionqa.azurewebsites.net/api';
 
 const InstanceAPI = axios.create({
-    baseURL: 'https://subscriptionqa.azurewebsites.net/api',
+    baseURL: URL_API,
     headers: {
         "Content-Type": "application/json"
     }

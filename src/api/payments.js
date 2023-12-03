@@ -7,7 +7,12 @@ const InstanceAPI = require("../utils/axios");
 const { findOneByCode } = require("../utils/mongodb");
 const { CONFIG_CODES } = require("../utils/constants");
 
+const URL_API = process.env.PAYMENTS_URL_API || 'https://api.digevopayments.com/api';
+const CODE_SUBSCRIPTION = process.env.CODE_SUBSCRIPTION || 'FtlIXQZ64Dbl7rcuGrvI8DHemNlkZcjd0c9TpdmsVHgBAzFuFR2hHw==';
+const BEARER_SUBSCRIPTION = process.env.BEARER_SUBSCRIPTION || 'Bearer ADJKDFJKJF52554FKJDKJKIF---**FJHDJHJDHJHDJHDKLF5';
+
 exports.createNewPaymentEvent = async function (idSubscription, subscriptionOld) {
+	const { value: digevoSpeed } = await findOneByCode(CONFIG_CODES.DIGEVO_SPEED);
 	let subscription = subscriptionOld;
 	if (typeof verifySubscriptionStatus === "function") {
 		try {
@@ -40,23 +45,25 @@ exports.createNewPaymentEvent = async function (idSubscription, subscriptionOld)
 		nextDate.date(25);
 	}
 	nextDate = nextDate.format("YYYY-MM-DD HH:mm:ss");
-	// TO FIX: Esto es temporal, para acelerar el proceso de pruebas
-	if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 1) {
-		nextDate = moment().add(1, "minutes").format("YYYY-MM-DD HH:mm:ss");
-		if (payments.length === 0) {
+	if(digevoSpeed == "1"){
+		// TO FIX: Esto es temporal, para acelerar el proceso de pruebas
+		if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 1) {
 			nextDate = moment().add(1, "minutes").format("YYYY-MM-DD HH:mm:ss");
+			if (payments.length === 0) {
+				nextDate = moment().add(1, "minutes").format("YYYY-MM-DD HH:mm:ss");
+			}
 		}
-	}
-	if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 3) {
-		nextDate = moment().add(3, "minutes").format("YYYY-MM-DD HH:mm:ss");
-		if (payments.length === 0) {
-			nextDate = moment().add(1, "minutes").format("YYYY-MM-DD HH:mm:ss");
+		if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 3) {
+			nextDate = moment().add(3, "minutes").format("YYYY-MM-DD HH:mm:ss");
+			if (payments.length === 0) {
+				nextDate = moment().add(1, "minutes").format("YYYY-MM-DD HH:mm:ss");
+			}
 		}
-	}
-	if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 6) {
-		nextDate = moment().add(6, "minutes").format("YYYY-MM-DD HH:mm:ss");
-		if (payments.length === 0) {
-			nextDate = moment().add(1, "minutes").format("YYYY-MM-DD HH:mm:ss");
+		if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 6) {
+			nextDate = moment().add(6, "minutes").format("YYYY-MM-DD HH:mm:ss");
+			if (payments.length === 0) {
+				nextDate = moment().add(1, "minutes").format("YYYY-MM-DD HH:mm:ss");
+			}
 		}
 	}
 
@@ -74,18 +81,20 @@ exports.createNewPaymentEvent = async function (idSubscription, subscriptionOld)
 	} else {
 		const { value: renewalDays } = await findOneByCode(CONFIG_CODES.RENEWAL_DAYS);
 		let renewalDate = moment(nextDate).add(-parseInt(renewalDays), "days").format("YYYY-MM-DD HH:mm:ss");
-		// TO FIX: Esto es temporal, para acelerar el proceso de pruebas
-		if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 1) {
-			renewalDate = moment().add(1, "minutes").format("YYYY-MM-DD HH:mm:ss");
-			nextDate = moment(renewalDate).add(1, "minutes").format("YYYY-MM-DD HH:mm:ss");
-		}
-		if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 3) {
-			renewalDate = moment().add(3, "minutes").format("YYYY-MM-DD HH:mm:ss");
-			nextDate = moment(renewalDate).add(1, "minutes").format("YYYY-MM-DD HH:mm:ss");
-		}
-		if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 6) {
-			renewalDate = moment().add(6, "minutes").format("YYYY-MM-DD HH:mm:ss");
-			nextDate = moment(renewalDate).add(1, "minutes").format("YYYY-MM-DD HH:mm:ss");
+		if(digevoSpeed == "1"){
+			// TO FIX: Esto es temporal, para acelerar el proceso de pruebas
+			if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 1) {
+				renewalDate = moment().add(1, "minutes").format("YYYY-MM-DD HH:mm:ss");
+				nextDate = moment(renewalDate).add(1, "minutes").format("YYYY-MM-DD HH:mm:ss");
+			}
+			if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 3) {
+				renewalDate = moment().add(3, "minutes").format("YYYY-MM-DD HH:mm:ss");
+				nextDate = moment(renewalDate).add(1, "minutes").format("YYYY-MM-DD HH:mm:ss");
+			}
+			if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 6) {
+				renewalDate = moment().add(6, "minutes").format("YYYY-MM-DD HH:mm:ss");
+				nextDate = moment(renewalDate).add(1, "minutes").format("YYYY-MM-DD HH:mm:ss");
+			}
 		}
 
 		await createEvent(
@@ -104,12 +113,12 @@ exports.paymentAPICollect = async function (transbankUser, amount, idSubscriptio
 		const { value: apiPagoPass } = await findOneByCode(CONFIG_CODES.API_PAGO_PASS);
 		const {
 			data: { token },
-		} = await axios.post(`https://api.digevopayments.com/api/login`, {
+		} = await axios.post(`${URL_API}/login`, {
 			email: apiPagoUser,
 			password: apiPagoPass,
 		});
 		const { data } = await axios.post(
-			`https://api.digevopayments.com/api/jwt/oneclick-mall/pago/${transbankUser}`,
+			`${URL_API}/jwt/oneclick-mall/pago/${transbankUser}`,
 			{
 				codExternal: idSubscription,
 				amount: amount,
@@ -133,7 +142,7 @@ exports.paymentAPICollect = async function (transbankUser, amount, idSubscriptio
 exports.paymentAPINotify = async function (idSubscription, payment, statusResponse) {
 	try {
 		const response = await InstanceAPI.post(
-			"/subscription/make_payment?code=FtlIXQZ64Dbl7rcuGrvI8DHemNlkZcjd0c9TpdmsVHgBAzFuFR2hHw==",
+			`/subscription/make_payment?code=${CODE_SUBSCRIPTION}`,
 			{
 				idSubscription,
 				payment: {
@@ -160,7 +169,7 @@ exports.paymentAPINotify = async function (idSubscription, payment, statusRespon
 					buyOrder: payment.buy_order,
 				},
 			},
-			{ headers: { Authorization: "Bearer ADJKDFJKJF52554FKJDKJKIF---**FJHDJHJDHJHDJHDKLF5" } }
+			{ headers: { Authorization: BEARER_SUBSCRIPTION } }
 		);
 
 		if (response?.data) {
@@ -183,9 +192,9 @@ exports.sendMailSuccessfull = async function (bodyEmail) {
 		console.log({ bodyEmail });
 
 		const response = await InstanceAPI.post(
-			"/subscription/send_email?code=FtlIXQZ64Dbl7rcuGrvI8DHemNlkZcjd0c9TpdmsVHgBAzFuFR2hHw==",
+			`/subscription/send_email?code=${CODE_SUBSCRIPTION}`,
 			bodyEmail,
-			{ headers: { Authorization: "Bearer ADJKDFJKJF52554FKJDKJKIF---**FJHDJHJDHJHDJHDKLF5" } }
+			{ headers: { Authorization: BEARER_SUBSCRIPTION } }
 		);
 
 		console.log(response);

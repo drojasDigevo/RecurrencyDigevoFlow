@@ -1,12 +1,16 @@
 const InstanceAPI = require("../utils/axios");
 const axios = require("axios");
-const moment = require("moment-timezone");
+
+const URL_API = process.env.GATEWAY_URL_API || 'https://gatewayrykqa.azurewebsites.net/api';
+const CODE_GATEWAY = process.env.CODE_GATEWAY || 'h3DPa0ylJaenaHpE7neI8xQETJl7rjzW-YTFf4MGb1OqKAzFuPkQo8g==';
+const CODE_SUBSCRIPTION = process.env.CODE_SUBSCRIPTION || 'FtlIXQZ64Dbl7rcuGrvI8DHemNlkZcjd0c9TpdmsVHgBAzFuFR2hHw==';
+const BEARER_SUBSCRIPTION = process.env.BEARER_SUBSCRIPTION || 'Bearer ADJKDFJKJF52554FKJDKJKIF---**FJHDJHJDHJHDJHDKLF5';
 
 exports.shipmentAPICreate = async function (idSubscription) {
 	try {
 		console.log("shipmentAPICreate", { idSubscription });
 		const response = await InstanceAPI.post(
-			"/send_information_customer?code=FtlIXQZ64Dbl7rcuGrvI8DHemNlkZcjd0c9TpdmsVHgBAzFuFR2hHw==",
+			`/send_information_customer?code=${CODE_SUBSCRIPTION}`,
 			{
 				idSubscription,
 			}
@@ -22,12 +26,12 @@ exports.shipmentAPINotify = async function (idSubscription, dispatch) {
 	try {
 		console.log("shipmentAPINotify", { idSubscription, dispatch });
 		const response = await axios.post(
-			"https://gatewayrykqa.azurewebsites.net/api/gateway/resend?code=3DPa0ylJaenaHpE7neI8xQETJl7rjzW-YTFf4MGb1OqKAzFuPkQo8g==",
+			`${URL_API}/gateway/resend?code=${CODE_GATEWAY}`,
 			{
 				idSubscription,
 				dispatch,
 			},
-			{ headers: { Authorization: "Bearer ADJKDFJKJF52554FKJDKJKIF---**FJHDJHJDHJHDJHDKLF5" } }
+			{ headers: { Authorization: BEARER_SUBSCRIPTION } }
 		);
 		if (response?.data) {
 			const { statusCode, content } = response.data;

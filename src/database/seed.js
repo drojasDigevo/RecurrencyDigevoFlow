@@ -132,6 +132,13 @@ async function insertSeedData(COSMOS_CONNECTION_STRING, COSMOS_DB_NAME) {
 				createdAt: now,
 				updatedAt: now,
 			},
+			{
+				code: CONFIG_CODES.DIGEVO_SPEED,
+				label: "Aceleración de ambiente (si es 1, acelerado, 0, ciclo normal)",
+				value: "1",
+				createdAt: now,
+				updatedAt: now,
+			},
 		]);
 		console.log(`${resultConfig.insertedCount} configurations inserted`);
 	} finally {

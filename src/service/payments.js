@@ -29,6 +29,7 @@ async function listPaymentsBySubscription(idSubscription) {
 
 exports.attemptPaymentBySubscription = async function (idSubscription, attempts) {
 	try {
+		const { value: digevoSpeed } = await findOneByCode(CONFIG_CODES.DIGEVO_SPEED);
 		const subscription = await verifySubscriptionStatus(idSubscription);
 		if (subscription) {
 			let nextDate = false;
@@ -49,15 +50,17 @@ exports.attemptPaymentBySubscription = async function (idSubscription, attempts)
 					.format("YYYY-MM-DD HH:mm:ss");
 				qtyPayments = 1;
 			}
-			// TO FIX: Esto es temporal, para acelerar el proceso de pruebas
-			if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 1) {
-				nextDate = moment().add(1, "minutes").format("YYYY-MM-DD HH:mm:ss");
-			}
-			if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 3) {
-				nextDate = moment().add(3, "minutes").format("YYYY-MM-DD HH:mm:ss");
-			}
-			if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 6) {
-				nextDate = moment().add(6, "minutes").format("YYYY-MM-DD HH:mm:ss");
+			if(digevoSpeed == "1"){
+				// TO FIX: Esto es temporal, para acelerar el proceso de pruebas
+				if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 1) {
+					nextDate = moment().add(1, "minutes").format("YYYY-MM-DD HH:mm:ss");
+				}
+				if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 3) {
+					nextDate = moment().add(3, "minutes").format("YYYY-MM-DD HH:mm:ss");
+				}
+				if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 6) {
+					nextDate = moment().add(6, "minutes").format("YYYY-MM-DD HH:mm:ss");
+				}
 			}
 
 			const { isOk, payment } = await paymentAPICollect(
@@ -164,15 +167,18 @@ exports.attemptPaymentBySubscription = async function (idSubscription, attempts)
 					const configPlusHours = await getConfigByCode(CONFIG_CODES.PAYMENT_FREQUENCY_OF_ATTEMPTS_HOURS);
 					const plusHours = Number(configPlusHours.value);
 					let dateRetry = now.clone().add(moment.duration(plusHours, "hours"));
-					// TO FIX: Esto es temporal, para acelerar el proceso de pruebas
-					if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 1) {
-						dateRetry = now.clone().add(moment.duration(1, "minutes"));
-					}
-					if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 3) {
-						dateRetry = now.clone().add(moment.duration(3, "minutes"));
-					}
-					if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 6) {
-						dateRetry = now.clone().add(moment.duration(6, "minutes"));
+
+					if(digevoSpeed == "1"){
+						// TO FIX: Esto es temporal, para acelerar el proceso de pruebas
+						if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 1) {
+							dateRetry = now.clone().add(moment.duration(1, "minutes"));
+						}
+						if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 3) {
+							dateRetry = now.clone().add(moment.duration(3, "minutes"));
+						}
+						if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 6) {
+							dateRetry = now.clone().add(moment.duration(6, "minutes"));
+						}
 					}
 
 					await createEvent(EventType.PAYMENT_ATTEMPT, { idSubscription, attempts: attempts + 1 }, dateRetry);

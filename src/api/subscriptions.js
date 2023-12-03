@@ -1,9 +1,12 @@
 const InstanceAPI = require("../utils/axios");
 
+const CODE_SUBSCRIPTION = process.env.CODE_SUBSCRIPTION || 'FtlIXQZ64Dbl7rcuGrvI8DHemNlkZcjd0c9TpdmsVHgBAzFuFR2hHw==';
+const BEARER_SUBSCRIPTION = process.env.BEARER_SUBSCRIPTION || 'Bearer ADJKDFJKJF52554FKJDKJKIF---**FJHDJHJDHJHDJHDKLF5';
+
 exports.getAPISubscription = async function (idSubscription) {
 	try {
 		const response = await InstanceAPI.post(
-			"/subscription/detail?code=FtlIXQZ64Dbl7rcuGrvI8DHemNlkZcjd0c9TpdmsVHgBAzFuFR2hHw==",
+			`/subscription/detail?code=${CODE_SUBSCRIPTION}`,
 			{
 				idSubscription: idSubscription,
 			}
@@ -21,9 +24,9 @@ exports.getAPISubscription = async function (idSubscription) {
 exports.subscriptionAPISendEmail = async function (body) {
 	try {
 		const response = await InstanceAPI.post(
-			"/subscription/send_email?code=FtlIXQZ64Dbl7rcuGrvI8DHemNlkZcjd0c9TpdmsVHgBAzFuFR2hHw==",
+			`/subscription/send_email?code=${CODE_SUBSCRIPTION}`,
 			body,
-			{ headers: { Authorization: "Bearer ADJKDFJKJF52554FKJDKJKIF---**FJHDJHJDHJHDJHDKLF5" } }
+			{ headers: { Authorization: BEARER_SUBSCRIPTION } }
 		);
 		if (response?.data) {
 			const { statusCode, content } = response.data;
@@ -40,7 +43,7 @@ exports.subscriptionAPISendEmail = async function (body) {
 exports.subscriptionAPIRenewal = async function (idSubscription) {
 	try {
 		const response = await InstanceAPI.post(
-			"/subscription/create_renewal?code=FtlIXQZ64Dbl7rcuGrvI8DHemNlkZcjd0c9TpdmsVHgBAzFuFR2hHw==",
+			`/subscription/create_renewal?code=${CODE_SUBSCRIPTION}`,
 			{
 				idSubscription: idSubscription,
 			}
@@ -60,7 +63,7 @@ exports.subscriptionAPIRenewal = async function (idSubscription) {
 exports.subscriptionAPILayOff = async function (idSubscription) {
 	try {
 		const response = await InstanceAPI.post(
-			"/subscription/lay_off?code=FtlIXQZ64Dbl7rcuGrvI8DHemNlkZcjd0c9TpdmsVHgBAzFuFR2hHw==",
+			`/subscription/lay_off?code=${CODE_SUBSCRIPTION}`,
 			{
 				idSubscription: idSubscription,
 				idReason: 2,
@@ -81,7 +84,7 @@ exports.subscriptionAPILayOff = async function (idSubscription) {
 exports.subscriptionAPIMailError = async function (idSubscription,idAccount,observation) {
 	try {
 		const response = await InstanceAPI.post(
-			"/subscription/send_email?code=FtlIXQZ64Dbl7rcuGrvI8DHemNlkZcjd0c9TpdmsVHgBAzFuFR2hHw==",
+			`/subscription/send_email?code=${CODE_SUBSCRIPTION}`,
 			{
 				idSubscription: idSubscription,
 				"to": "drojas@digevo.com",

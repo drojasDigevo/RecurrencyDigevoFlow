@@ -31,6 +31,7 @@ async function listShipmentsBySubscription(idSubscription) {
 exports.createShipmentBySubscription = async function (idSubscription, attempts = false) {
 	let idAccount = 0;
 	try {
+		const { value: digevoSpeed } = await findOneByCode(CONFIG_CODES.DIGEVO_SPEED);
 		let repeat = false;
 		let possibleError = false;
 		console.log("INICIAR DESPACHO");
@@ -155,16 +156,20 @@ exports.createShipmentBySubscription = async function (idSubscription, attempts 
 					return await createErrorLog(idSubscription, "Se hizo el máximo de reintentos en despacho");
 				}
 				let newAttempDate = moment().add(shipmentFailFrequency, shipmentFailUom).toDate();
-				// TO FIX: Esto es temporal, para acelerar el proceso de pruebas
-				if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 1) {
-					newAttempDate = moment().add(5, "minutes").toDate();
+				
+				if(digevoSpeed == "1"){
+					// TO FIX: Esto es temporal, para acelerar el proceso de pruebas
+					if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 1) {
+						newAttempDate = moment().add(5, "minutes").toDate();
+					}
+					if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 3) {
+						newAttempDate = moment().add(5, "minutes").toDate();
+					}
+					if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 6) {
+						newAttempDate = moment().add(5, "minutes").toDate();
+					}
 				}
-				if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 3) {
-					newAttempDate = moment().add(5, "minutes").toDate();
-				}
-				if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 6) {
-					newAttempDate = moment().add(5, "minutes").toDate();
-				}
+
 				await createEvent(EventType.SHIPMENT_DISPATCHED, { idSubscription, attempts }, newAttempDate);
 				await createErrorLog(idSubscription, "Ocurrio un error inesperado al crear el despacho", {
 					shipment: possibleError instanceof Error ? possibleError.toString() : JSON.stringify(possibleError),

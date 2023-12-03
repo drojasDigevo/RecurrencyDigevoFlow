@@ -23,6 +23,11 @@ exports.getConfigByCode = async function (code) {
 }
 
 exports.updateConfigByCode = async function (code, newValue) {
+    if(code == "DIGEVO_SPEED"){
+        if(newValue != 1 && newValue != 0){
+            newValue = 1;
+        }
+    }
     const { modifiedCount } = await updateOneFilter(COLLECTION, { code }, { value: newValue })
     return modifiedCount === 1
 }

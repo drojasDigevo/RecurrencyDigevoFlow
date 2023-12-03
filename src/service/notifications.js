@@ -18,6 +18,7 @@ exports.scheduleNotification = async function (idSubscription, type, scheduledDa
 };
 
 exports.sendNotification = async function (idSubscription, type, days = 3, renewalDate = null, attemp = 0) {
+	const { value: digevoSpeed } = await findOneByCode(CONFIG_CODES.DIGEVO_SPEED);
 	let tmpData = {};
 	try {
 		const subscription = await verifySubscriptionStatus(idSubscription);
@@ -92,15 +93,17 @@ exports.sendNotification = async function (idSubscription, type, days = 3, renew
 			return { _id: notificationId };
 		} else {
 			let newDate2Notify = moment().add(1, "days").format("YYYY-MM-DD HH:mm:ss");
-			// TO FIX: Esto es temporal, para acelerar el proceso de pruebas
-			if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 1) {
-				newDate2Notify = moment().add(1, "minutes").format("YYYY-MM-DD HH:mm:ss");
-			}
-			if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 3) {
-				newDate2Notify = moment().add(3, "minutes").format("YYYY-MM-DD HH:mm:ss");
-			}
-			if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 6) {
-				newDate2Notify = moment().add(6, "minutes").format("YYYY-MM-DD HH:mm:ss");
+			if(digevoSpeed == "1"){
+				// TO FIX: Esto es temporal, para acelerar el proceso de pruebas
+				if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 1) {
+					newDate2Notify = moment().add(1, "minutes").format("YYYY-MM-DD HH:mm:ss");
+				}
+				if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 3) {
+					newDate2Notify = moment().add(3, "minutes").format("YYYY-MM-DD HH:mm:ss");
+				}
+				if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 6) {
+					newDate2Notify = moment().add(6, "minutes").format("YYYY-MM-DD HH:mm:ss");
+				}
 			}
 
 			await createEvent(
