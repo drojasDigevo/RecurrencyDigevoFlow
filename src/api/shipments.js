@@ -2,7 +2,7 @@ const InstanceAPI = require("../utils/axios");
 const axios = require("axios");
 
 const URL_API = process.env.GATEWAY_URL_API || 'https://gatewayrykqa.azurewebsites.net/api';
-const CODE_GATEWAY = process.env.CODE_GATEWAY || 'h3DPa0ylJaenaHpE7neI8xQETJl7rjzW-YTFf4MGb1OqKAzFuPkQo8g==';
+const CODE_GATEWAY = process.env.CODE_GATEWAY || '3DPa0ylJaenaHpE7neI8xQETJl7rjzW-YTFf4MGb1OqKAzFuPkQo8g==';
 const CODE_SUBSCRIPTION = process.env.CODE_SUBSCRIPTION || 'FtlIXQZ64Dbl7rcuGrvI8DHemNlkZcjd0c9TpdmsVHgBAzFuFR2hHw==';
 const BEARER_SUBSCRIPTION = process.env.BEARER_SUBSCRIPTION || 'Bearer ADJKDFJKJF52554FKJDKJKIF---**FJHDJHJDHJHDJHDKLF5';
 
