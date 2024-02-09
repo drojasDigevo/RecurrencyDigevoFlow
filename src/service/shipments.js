@@ -106,7 +106,7 @@ exports.createShipmentBySubscription = async function (idSubscription, attempts 
 					} else {
 						repeat = true;
 						possibleError = data;
-						errorText = `Suscripción:
+						let errorText = `Suscripción:
 						${idSubscription}
 						
 						fecha-hora:
