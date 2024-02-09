@@ -106,7 +106,21 @@ exports.createShipmentBySubscription = async function (idSubscription, attempts 
 					} else {
 						repeat = true;
 						possibleError = data;
-						await createErrorLog(idSubscription, "Hubo un error al informar del despacho", { shipmentId });
+						await createErrorLog(idSubscription, "Hubo un error al informar del despacho 1", {
+							shipmentId,
+							test: {
+								to: "drojas@digevo.com",
+								type: "html",
+								customFrom: "drojas@digevo.com",
+								fromName: "RyK",
+								idAccount: idAccount,
+								subject: "Error Sistema recurrencia",
+								body: {
+									observation: "observation",
+								},
+								operation: "ERRORADMIN",
+							},
+						});
 						await subscriptionAPIMailError(
 							idSubscription,
 							idAccount,
@@ -146,7 +160,20 @@ exports.createShipmentBySubscription = async function (idSubscription, attempts 
 				} else {
 					repeat = true;
 					possibleError = data;
-					await createErrorLog(idSubscription, "Hubo un error al informar del despacho");
+					await createErrorLog(idSubscription, "Hubo un error al informar del despacho 2", {
+						test: {
+							to: "drojas@digevo.com",
+							type: "html",
+							customFrom: "drojas@digevo.com",
+							fromName: "RyK",
+							idAccount: idAccount,
+							subject: "Error Sistema recurrencia",
+							body: {
+								observation: "observation",
+							},
+							operation: "ERRORADMIN",
+						},
+					});
 					await subscriptionAPIMailError(idSubscription, idAccount, "Hubo un error al informar del despacho");
 				}
 			}
@@ -185,9 +212,21 @@ exports.createShipmentBySubscription = async function (idSubscription, attempts 
 		}
 		await createErrorLog(idSubscription, "No se pudo crear el despacho");
 	} catch (error) {
-		await createErrorLog(idSubscription, "Ocurrio un error inesperado al crear el despacho", {
+		await createErrorLog(idSubscription, "Ocurrio un error inesperado al crear el despacho 3", {
 			name: error.name,
 			message: error.message,
+			test: {
+				to: "drojas@digevo.com",
+				type: "html",
+				customFrom: "drojas@digevo.com",
+				fromName: "RyK",
+				idAccount: idAccount,
+				subject: "Error Sistema recurrencia",
+				body: {
+					observation: "observation",
+				},
+				operation: "ERRORADMIN",
+			},
 		});
 		await subscriptionAPIMailError(idSubscription, idAccount, "Ocurrio un error inesperado al crear el despacho");
 		console.error(error);
