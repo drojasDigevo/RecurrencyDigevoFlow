@@ -28,10 +28,12 @@ async function listPaymentsBySubscription(idSubscription) {
 }
 
 exports.attemptPaymentBySubscription = async function (idSubscription, attempts) {
+	let idAccount = 0;
 	try {
 		const { value: digevoSpeed } = await findOneByCode(CONFIG_CODES.DIGEVO_SPEED);
 		const subscription = await verifySubscriptionStatus(idSubscription);
 		if (subscription) {
+			idAccount = subscription.account.idAccount;
 			let nextDate = false;
 			let qtyPayments = 0;
 			if (subscription.frequencyType.name == "Mensual") {
@@ -50,7 +52,7 @@ exports.attemptPaymentBySubscription = async function (idSubscription, attempts)
 					.format("YYYY-MM-DD HH:mm:ss");
 				qtyPayments = 1;
 			}
-			if(digevoSpeed == "1"){
+			if (digevoSpeed == "1") {
 				// TO FIX: Esto es temporal, para acelerar el proceso de pruebas
 				if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 1) {
 					nextDate = moment().add(1, "minutes").format("YYYY-MM-DD HH:mm:ss");
@@ -168,7 +170,7 @@ exports.attemptPaymentBySubscription = async function (idSubscription, attempts)
 					const plusHours = Number(configPlusHours.value);
 					let dateRetry = now.clone().add(moment.duration(plusHours, "hours"));
 
-					if(digevoSpeed == "1"){
+					if (digevoSpeed == "1") {
 						// TO FIX: Esto es temporal, para acelerar el proceso de pruebas
 						if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 1) {
 							dateRetry = now.clone().add(moment.duration(1, "minutes"));
@@ -197,12 +199,39 @@ exports.attemptPaymentBySubscription = async function (idSubscription, attempts)
 			}
 		} else {
 			await createErrorLog(idSubscription, "No se pudo ejecutar el intento de cobro");
+			let errorText = `Suscripción:
+			${idSubscription}
+			
+			fecha-hora:
+			${moment().format("YYYY-MM-DD HH:mm:ss")}
+			
+			Evento:
+			PAYMENT_ATTEMPT
+						
+			Punto:
+			${"/subscription/detail"}
+			
+			Error capturado:
+			${error.toString()}`;
+
+			await subscriptionAPIMailError(idSubscription, idAccount, errorText);
 		}
 	} catch (error) {
 		await createErrorLog(idSubscription, "Ocurrio un error inesperado al ejecutar el cobro", {
 			name: error.name,
 			message: error.message,
 		});
-		console.error(error);
+		let errorText = `Suscripción:
+		${idSubscription}
+		
+		fecha-hora:
+		${moment().format("YYYY-MM-DD HH:mm:ss")}
+		
+		Evento:
+		PAYMENT_ATTEMPT
+		
+		Error capturado:
+		${error.toString()}`;
+		await subscriptionAPIMailError(idSubscription, idAccount, errorText);
 	}
 };

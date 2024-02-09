@@ -159,21 +159,26 @@ exports.createShipmentBySubscription = async function (idSubscription, attempts 
 				} else {
 					repeat = true;
 					possibleError = data;
-					await createErrorLog(idSubscription, "Hubo un error al informar del despacho 2", {
-						test: {
-							to: "drojas@digevo.com",
-							type: "html",
-							customFrom: "drojas@digevo.com",
-							fromName: "RyK",
-							idAccount: idAccount,
-							subject: "Error Sistema recurrencia",
-							body: {
-								observation: "observation",
-							},
-							operation: "ERRORADMIN",
-						},
-					});
-					await subscriptionAPIMailError(idSubscription, idAccount, "Hubo un error al informar del despacho");
+					let errorText = `Suscripción:
+					${idSubscription}
+					
+					fecha-hora:
+					${moment().format("YYYY-MM-DD HH:mm:ss")}
+					
+					Evento:
+					SHIPMENT_DISPATCHED
+					
+					Punto:
+					${"/send_information_customer"}
+
+					Intento:
+					${attempts}
+					
+					Error capturado:
+					${possibleError.error}`;
+
+					await createErrorLog(idSubscription, errorText);
+					await subscriptionAPIMailError(idSubscription, idAccount, errorText);
 				}
 			}
 			if (repeat) {
@@ -211,23 +216,22 @@ exports.createShipmentBySubscription = async function (idSubscription, attempts 
 		}
 		await createErrorLog(idSubscription, "No se pudo crear el despacho");
 	} catch (error) {
-		await createErrorLog(idSubscription, "Ocurrio un error inesperado al crear el despacho 3", {
+		let errorText = `Suscripción:
+		${idSubscription}
+		
+		fecha-hora:
+		${moment().format("YYYY-MM-DD HH:mm:ss")}
+		
+		Evento:
+		SHIPMENT_DISPATCHED
+		
+		Error capturado:
+		${error.toString()}`;
+
+		await createErrorLog(idSubscription, errorText, {
 			name: error.name,
 			message: error.message,
-			test: {
-				to: "drojas@digevo.com",
-				type: "html",
-				customFrom: "drojas@digevo.com",
-				fromName: "RyK",
-				idAccount: idAccount,
-				subject: "Error Sistema recurrencia",
-				body: {
-					observation: "observation",
-				},
-				operation: "ERRORADMIN",
-			},
 		});
-		await subscriptionAPIMailError(idSubscription, idAccount, "Ocurrio un error inesperado al crear el despacho");
-		console.error(error);
+		await subscriptionAPIMailError(idSubscription, idAccount, errorText);
 	}
 };
