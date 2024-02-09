@@ -7,11 +7,13 @@ const { CONFIG_CODES } = require("../utils/constants");
 const moment = require("moment");
 
 exports.renewSubscription = async (idSubscription, stage = "", attempt = 0) => {
+	let idAccount = 0;
 	let bodyEmail = {};
 	try {
 		const { value: digevoSpeed } = await findOneByCode(CONFIG_CODES.DIGEVO_SPEED);
 		const subscription = await verifySubscriptionStatus(idSubscription);
 		if (subscription) {
+			idAccount = subscription.account.idAccount;
 			if (subscription.autoRenew !== true) {
 				await createSuccessLog(idSubscription, "No se notifica porque estado de autoRenew no es true", {
 					autoRenew: subscription.autoRenew,
@@ -44,7 +46,7 @@ exports.renewSubscription = async (idSubscription, stage = "", attempt = 0) => {
 						}
 					);
 					let scheduledDate = moment().add(1, "days").format("YYYY-MM-DD HH:mm:ss");
-					if(digevoSpeed == "1"){
+					if (digevoSpeed == "1") {
 						// TO FIX: Esto es temporal, para acelerar el proceso de pruebas
 						if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 1) {
 							scheduledDate = moment().add(1, "minutes").format("YYYY-MM-DD HH:mm:ss");
@@ -109,7 +111,7 @@ exports.renewSubscription = async (idSubscription, stage = "", attempt = 0) => {
 					}
 				);
 				let scheduledDate = moment().add(1, "days").format("YYYY-MM-DD HH:mm:ss");
-				if(digevoSpeed == "1"){
+				if (digevoSpeed == "1") {
 					// TO FIX: Esto es temporal, para acelerar el proceso de pruebas
 					if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 1) {
 						scheduledDate = moment().add(1, "minutes").format("YYYY-MM-DD HH:mm:ss");
@@ -133,6 +135,25 @@ exports.renewSubscription = async (idSubscription, stage = "", attempt = 0) => {
 			await createSuccessLog(idSubscription, "Se renovó correctamente siguiendo todo el proceso", {
 				idSubscription,
 			});
+		} else {
+			let errorText = `Suscripción:
+			${idSubscription}
+			
+			fecha-hora:
+			${moment().format("YYYY-MM-DD HH:mm:ss")}
+			
+			Evento:
+			RENEW_SUBSCRIPTION
+						
+			Punto:
+			${"/subscription/detail"}
+			
+			Error capturado:
+			${error.toString()}`;
+
+			await subscriptionAPIMailError(idSubscription, idAccount, errorText);
+
+			await createErrorLog(idSubscription, "No se pudo crear el despacho");
 		}
 	} catch (err) {
 		console.error(err);
@@ -140,5 +161,19 @@ exports.renewSubscription = async (idSubscription, stage = "", attempt = 0) => {
 			bodyEmail,
 			error: JSON.stringify(err),
 		});
+
+		let errorText = `Suscripción:
+		${idSubscription}
+		
+		fecha-hora:
+		${moment().format("YYYY-MM-DD HH:mm:ss")}
+		
+		Evento:
+		RENEW_SUBSCRIPTION
+		
+		Error capturado:
+		${error.toString()}`;
+
+		await subscriptionAPIMailError(idSubscription, idAccount, errorText);
 	}
 };
