@@ -1,5 +1,6 @@
 const { verifySubscriptionStatus, renewalSubscription } = require("./subscriptions");
 const { subscriptionAPISendEmail, subscriptionAPIRenewal } = require("../api/subscriptions");
+const { subscriptionAPIMailError } = require("../api/subscriptions");
 const { createErrorLog, createSuccessLog } = require("./logs");
 const { createEvent, EventType } = require("../service/events");
 const { findOneByCode } = require("../utils/mongodb");

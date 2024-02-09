@@ -6,6 +6,7 @@ const { verifySubscriptionStatus, cancelSubscription } = require("./subscription
 const { paymentAPICollect, paymentAPINotify, sendMailSuccessfull } = require("../api/payments");
 const { getConfigByCode } = require("./config");
 const { createNewPaymentEvent } = require("../api/payments");
+const { subscriptionAPIMailError } = require("../api/subscriptions");
 const { CONFIG_CODES } = require("../utils/constants");
 const { createErrorLog, createSuccessLog, createInfoLog } = require("./logs");
 const { convertUTC } = require("../utils/dates");
