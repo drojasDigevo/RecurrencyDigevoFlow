@@ -213,8 +213,26 @@ exports.createShipmentBySubscription = async function (idSubscription, attempts 
 					delivery_date: convertUTC(newAttempDate),
 				});
 			}
+		} else {
+			let errorText = `Suscripción:
+			${idSubscription}
+			
+			fecha-hora:
+			${moment().format("YYYY-MM-DD HH:mm:ss")}
+			
+			Evento:
+			SHIPMENT_DISPATCHED
+						
+			Punto:
+			${"/subscription/detail"}
+			
+			Error capturado:
+			${error.toString()}`;
+
+			await subscriptionAPIMailError(idSubscription, idAccount, errorText);
+
+			await createErrorLog(idSubscription, "No se pudo crear el despacho");
 		}
-		await createErrorLog(idSubscription, "No se pudo crear el despacho");
 	} catch (error) {
 		let errorText = `Suscripción:
 		${idSubscription}
