@@ -1,21 +1,17 @@
 const InstanceAPI = require("../utils/axios");
 const axios = require("axios");
 
-const URL_API = process.env.GATEWAY_URL_API || 'https://gatewayrykqa.azurewebsites.net/api';
-const CODE_GATEWAY = process.env.CODE_GATEWAY || '3DPa0ylJaenaHpE7neI8xQETJl7rjzW-YTFf4MGb1OqKAzFuPkQo8g==';
-const CODE_SUBSCRIPTION = process.env.CODE_SUBSCRIPTION || 'FtlIXQZ64Dbl7rcuGrvI8DHemNlkZcjd0c9TpdmsVHgBAzFuFR2hHw==';
-const BEARER_SUBSCRIPTION = process.env.BEARER_SUBSCRIPTION || 'Bearer ADJKDFJKJF52554FKJDKJKIF---**FJHDJHJDHJHDJHDKLF5';
+const URL_API = process.env.GATEWAY_URL_API || "https://gatewayrykqa.azurewebsites.net/api";
+const CODE_GATEWAY = process.env.CODE_GATEWAY || "3DPa0ylJaenaHpE7neI8xQETJl7rjzW-YTFf4MGb1OqKAzFuPkQo8g==";
+const CODE_SUBSCRIPTION = process.env.CODE_SUBSCRIPTION || "FtlIXQZ64Dbl7rcuGrvI8DHemNlkZcjd0c9TpdmsVHgBAzFuFR2hHw==";
+const BEARER_SUBSCRIPTION =
+	process.env.BEARER_SUBSCRIPTION || "Bearer ADJKDFJKJF52554FKJDKJKIF---**FJHDJHJDHJHDJHDKLF5";
 
 exports.shipmentAPICreate = async function (idSubscription) {
 	try {
-		console.log("shipmentAPICreate", { idSubscription });
-		const response = await InstanceAPI.post(
-			`/send_information_customer?code=${CODE_SUBSCRIPTION}`,
-			{
-				idSubscription,
-			}
-		);
-		console.log("rendir", response);
+		const response = await InstanceAPI.post(`/send_information_customer?code=${CODE_SUBSCRIPTION}`, {
+			idSubscription,
+		});
 		return { isOk: true, data: response?.data };
 	} catch (error) {
 		return { isOk: false, shipment: error.response.data };

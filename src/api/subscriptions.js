@@ -76,7 +76,7 @@ exports.subscriptionAPIMailError = async function (idSubscription, idAccount, ob
 		const response = await InstanceAPI.post(
 			`/subscription/send_email?code=${CODE_SUBSCRIPTION}`,
 			{
-				//idSubscription: idSubscription,
+				idSubscription: idSubscription,
 				to: "drojas@digevo.com",
 				type: "html",
 				customFrom: "drojas@digevo.com",

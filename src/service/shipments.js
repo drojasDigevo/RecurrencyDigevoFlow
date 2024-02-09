@@ -106,26 +106,28 @@ exports.createShipmentBySubscription = async function (idSubscription, attempts 
 					} else {
 						repeat = true;
 						possibleError = data;
-						await createErrorLog(idSubscription, "Hubo un error al informar del despacho 1", {
+						errorText = `Suscripción:
+						${idSubscription}
+						
+						fecha-hora:
+						${moment().format("YYYY-MM-DD HH:mm:ss")}
+						
+						Evento:
+						PAYMENT_ATTEMPT o SHIPMENT_DISPATCHED o etc
+						
+						id evento:
+						id de la recurrencia
+						
+						Punto:
+						${"/send_information_customer"}
+						
+						Error capturado:
+						${possibleError}`;
+
+						await createErrorLog(idSubscription, errorText, {
 							shipmentId,
-							test: {
-								to: "drojas@digevo.com",
-								type: "html",
-								customFrom: "drojas@digevo.com",
-								fromName: "RyK",
-								idAccount: idAccount,
-								subject: "Error Sistema recurrencia",
-								body: {
-									observation: "observation",
-								},
-								operation: "ERRORADMIN",
-							},
 						});
-						await subscriptionAPIMailError(
-							idSubscription,
-							idAccount,
-							"Hubo un error al informar del despacho"
-						);
+						await subscriptionAPIMailError(idSubscription, idAccount, errorText);
 					}
 				} else {
 					repeat = true;
