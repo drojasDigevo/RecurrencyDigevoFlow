@@ -73,19 +73,25 @@ exports.subscriptionAPILayOff = async function (idSubscription) {
 
 exports.subscriptionAPIMailError = async function (idSubscription, idAccount, observation) {
 	try {
-		const response = await InstanceAPI.post(`/subscription/send_email?code=${CODE_SUBSCRIPTION}`, {
-			//idSubscription: idSubscription,
-			to: "drojas@digevo.com",
-			type: "html",
-			customFrom: "drojas@digevo.com",
-			fromName: "RyK",
-			idAccount: idAccount,
-			subject: "Error Sistema recurrencia",
-			body: {
-				observation: observation,
+		const response = await InstanceAPI.post(
+			`/subscription/send_email?code=${CODE_SUBSCRIPTION}`,
+			{
+				//idSubscription: idSubscription,
+				to: "drojas@digevo.com",
+				type: "html",
+				customFrom: "drojas@digevo.com",
+				fromName: "RyK",
+				idAccount: idAccount,
+				subject: "Error Sistema recurrencia",
+				body: {
+					observation: observation,
+				},
+				operation: "ERRORADMIN",
 			},
-			operation: "ERRORADMIN",
-		});
+			{
+				headers: { Authorization: BEARER_SUBSCRIPTION },
+			}
+		);
 		if (response?.data) {
 			const { statusCode, content } = response.data;
 			if (statusCode === 200) return content;
