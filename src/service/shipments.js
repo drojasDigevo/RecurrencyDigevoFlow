@@ -113,16 +113,13 @@ exports.createShipmentBySubscription = async function (idSubscription, attempts 
 						${moment().format("YYYY-MM-DD HH:mm:ss")}
 						
 						Evento:
-						PAYMENT_ATTEMPT o SHIPMENT_DISPATCHED o etc
-						
-						id evento:
-						id de la recurrencia
+						SHIPMENT_DISPATCHED
 						
 						Punto:
 						${"/send_information_customer"}
 						
 						Error capturado:
-						${possibleError}`;
+						${possibleError.error}`;
 
 						await createErrorLog(idSubscription, errorText, {
 							shipmentId,
