@@ -3,7 +3,7 @@ const client = require("../database/mongodb");
 const { insertOne, verifyCreateIndex, findOneByCode } = require("../utils/mongodb");
 const { createEvent, EventType } = require("./events");
 const { verifySubscriptionStatus } = require("./subscriptions");
-//const { subscriptionAPIMailError } = require("../api/subscriptions");
+const { subscriptionAPIMailError } = require("../api/subscriptions");
 const { shipmentAPICreate, shipmentAPINotify } = require("../api/shipments");
 const { createErrorLog, createSuccessLog, createInfoLog } = require("./logs");
 const { convertUTC } = require("../utils/dates");
@@ -107,7 +107,11 @@ exports.createShipmentBySubscription = async function (idSubscription, attempts 
 						repeat = true;
 						possibleError = data;
 						await createErrorLog(idSubscription, "Hubo un error al informar del despacho", { shipmentId });
-						//await subscriptionAPIMailError(idSubscription, idAccount, "Hubo un error al informar del despacho");
+						await subscriptionAPIMailError(
+							idSubscription,
+							idAccount,
+							"Hubo un error al informar del despacho"
+						);
 					}
 				} else {
 					repeat = true;
@@ -143,7 +147,7 @@ exports.createShipmentBySubscription = async function (idSubscription, attempts 
 					repeat = true;
 					possibleError = data;
 					await createErrorLog(idSubscription, "Hubo un error al informar del despacho");
-					//await subscriptionAPIMailError(idSubscription, idAccount, "Hubo un error al informar del despacho");
+					await subscriptionAPIMailError(idSubscription, idAccount, "Hubo un error al informar del despacho");
 				}
 			}
 			if (repeat) {
@@ -156,8 +160,8 @@ exports.createShipmentBySubscription = async function (idSubscription, attempts 
 					return await createErrorLog(idSubscription, "Se hizo el máximo de reintentos en despacho");
 				}
 				let newAttempDate = moment().add(shipmentFailFrequency, shipmentFailUom).toDate();
-				
-				if(digevoSpeed == "1"){
+
+				if (digevoSpeed == "1") {
 					// TO FIX: Esto es temporal, para acelerar el proceso de pruebas
 					if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 1) {
 						newAttempDate = moment().add(5, "minutes").toDate();
@@ -185,7 +189,7 @@ exports.createShipmentBySubscription = async function (idSubscription, attempts 
 			name: error.name,
 			message: error.message,
 		});
-		//await subscriptionAPIMailError(idSubscription, idAccount, "Ocurrio un error inesperado al crear el despacho");
+		await subscriptionAPIMailError(idSubscription, idAccount, "Ocurrio un error inesperado al crear el despacho");
 		console.error(error);
 	}
 };

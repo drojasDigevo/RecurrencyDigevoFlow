@@ -1,16 +1,14 @@
 const InstanceAPI = require("../utils/axios");
 
-const CODE_SUBSCRIPTION = process.env.CODE_SUBSCRIPTION || 'FtlIXQZ64Dbl7rcuGrvI8DHemNlkZcjd0c9TpdmsVHgBAzFuFR2hHw==';
-const BEARER_SUBSCRIPTION = process.env.BEARER_SUBSCRIPTION || 'Bearer ADJKDFJKJF52554FKJDKJKIF---**FJHDJHJDHJHDJHDKLF5';
+const CODE_SUBSCRIPTION = process.env.CODE_SUBSCRIPTION || "FtlIXQZ64Dbl7rcuGrvI8DHemNlkZcjd0c9TpdmsVHgBAzFuFR2hHw==";
+const BEARER_SUBSCRIPTION =
+	process.env.BEARER_SUBSCRIPTION || "Bearer ADJKDFJKJF52554FKJDKJKIF---**FJHDJHJDHJHDJHDKLF5";
 
 exports.getAPISubscription = async function (idSubscription) {
 	try {
-		const response = await InstanceAPI.post(
-			`/subscription/detail?code=${CODE_SUBSCRIPTION}`,
-			{
-				idSubscription: idSubscription,
-			}
-		);
+		const response = await InstanceAPI.post(`/subscription/detail?code=${CODE_SUBSCRIPTION}`, {
+			idSubscription: idSubscription,
+		});
 		if (response?.data) {
 			const { statusCode, content } = response.data;
 			if (statusCode === 200) return content;
@@ -23,11 +21,9 @@ exports.getAPISubscription = async function (idSubscription) {
 
 exports.subscriptionAPISendEmail = async function (body) {
 	try {
-		const response = await InstanceAPI.post(
-			`/subscription/send_email?code=${CODE_SUBSCRIPTION}`,
-			body,
-			{ headers: { Authorization: BEARER_SUBSCRIPTION } }
-		);
+		const response = await InstanceAPI.post(`/subscription/send_email?code=${CODE_SUBSCRIPTION}`, body, {
+			headers: { Authorization: BEARER_SUBSCRIPTION },
+		});
 		if (response?.data) {
 			const { statusCode, content } = response.data;
 			if (statusCode === 200) return { isOk: true, content };
@@ -42,12 +38,9 @@ exports.subscriptionAPISendEmail = async function (body) {
 
 exports.subscriptionAPIRenewal = async function (idSubscription) {
 	try {
-		const response = await InstanceAPI.post(
-			`/subscription/create_renewal?code=${CODE_SUBSCRIPTION}`,
-			{
-				idSubscription: idSubscription,
-			}
-		);
+		const response = await InstanceAPI.post(`/subscription/create_renewal?code=${CODE_SUBSCRIPTION}`, {
+			idSubscription: idSubscription,
+		});
 		if (response?.data) {
 			const { statusCode, content } = response.data;
 			if (statusCode === 200) return { isOk: true, content };
@@ -62,15 +55,12 @@ exports.subscriptionAPIRenewal = async function (idSubscription) {
 
 exports.subscriptionAPILayOff = async function (idSubscription) {
 	try {
-		const response = await InstanceAPI.post(
-			`/subscription/lay_off?code=${CODE_SUBSCRIPTION}`,
-			{
-				idSubscription: idSubscription,
-				idReason: 2,
-				subReason: 6,
-				description: "Suspendido por razones varias",
-			}
-		);
+		const response = await InstanceAPI.post(`/subscription/lay_off?code=${CODE_SUBSCRIPTION}`, {
+			idSubscription: idSubscription,
+			idReason: 2,
+			subReason: 6,
+			description: "Suspendido por razones varias",
+		});
 		if (response?.data) {
 			const { statusCode, content } = response.data;
 			if (statusCode === 200) return content;
@@ -81,24 +71,21 @@ exports.subscriptionAPILayOff = async function (idSubscription) {
 	}
 };
 
-exports.subscriptionAPIMailError = async function (idSubscription,idAccount,observation) {
+exports.subscriptionAPIMailError = async function (idSubscription, idAccount, observation) {
 	try {
-		const response = await InstanceAPI.post(
-			`/subscription/send_email?code=${CODE_SUBSCRIPTION}`,
-			{
-				idSubscription: idSubscription,
-				"to": "drojas@digevo.com",
-				"type": "html",
-				"customFrom": "drojas@digevo.com", 
-				"fromName": "RyK",
-				"idAccount": idAccount,
-				"subject": "Error Sistema recurrencia",
-				"body": {
-					"observation": observation
-				},
-				"operation": "ERRORADMIN"
-			 }
-		);
+		const response = await InstanceAPI.post(`/subscription/send_email?code=${CODE_SUBSCRIPTION}`, {
+			//idSubscription: idSubscription,
+			to: "drojas@digevo.com",
+			type: "html",
+			customFrom: "drojas@digevo.com",
+			fromName: "RyK",
+			idAccount: idAccount,
+			subject: "Error Sistema recurrencia",
+			body: {
+				observation: observation,
+			},
+			operation: "ERRORADMIN",
+		});
 		if (response?.data) {
 			const { statusCode, content } = response.data;
 			if (statusCode === 200) return content;
