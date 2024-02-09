@@ -149,7 +149,7 @@ exports.renewSubscription = async (idSubscription, stage = "", attempt = 0) => {
 			${"/subscription/detail"}
 			
 			Error capturado:
-			${error.toString()}`;
+			${"/subscription/detail not found"}`;
 
 			await subscriptionAPIMailError(idSubscription, idAccount, errorText);
 

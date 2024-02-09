@@ -227,7 +227,7 @@ exports.createShipmentBySubscription = async function (idSubscription, attempts 
 			${"/subscription/detail"}
 			
 			Error capturado:
-			${error.toString()}`;
+			${"/subscription/detail not found"}`;
 
 			await subscriptionAPIMailError(idSubscription, idAccount, errorText);
 
