@@ -51,19 +51,19 @@ exports.createNewPaymentEvent = async function (idSubscription, subscriptionOld)
 	if (digevoSpeed == "1") {
 		// TO FIX: Esto es temporal, para acelerar el proceso de pruebas
 		if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 1) {
-			nextDate = moment().add(1, "minutes").format("YYYY-MM-DD HH:mm:ss");
+			nextDate = moment(subscription.startDate).add(1, "minutes").format("YYYY-MM-DD HH:mm:ss");
 			if (payments.length === 0) {
 				nextDate = moment().add(1, "minutes").format("YYYY-MM-DD HH:mm:ss");
 			}
 		}
 		if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 3) {
-			nextDate = moment().add(3, "minutes").format("YYYY-MM-DD HH:mm:ss");
+			nextDate = moment(subscription.startDate).add(3, "minutes").format("YYYY-MM-DD HH:mm:ss");
 			if (payments.length === 0) {
 				nextDate = moment().add(1, "minutes").format("YYYY-MM-DD HH:mm:ss");
 			}
 		}
 		if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 6) {
-			nextDate = moment().add(6, "minutes").format("YYYY-MM-DD HH:mm:ss");
+			nextDate = moment(subscription.startDate).add(6, "minutes").format("YYYY-MM-DD HH:mm:ss");
 			if (payments.length === 0) {
 				nextDate = moment().add(1, "minutes").format("YYYY-MM-DD HH:mm:ss");
 			}
