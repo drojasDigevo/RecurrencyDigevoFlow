@@ -59,13 +59,13 @@ exports.createNewPaymentEvent = async function (idSubscription, subscriptionOld)
 		if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 3) {
 			nextDate = moment(subscription.startDate).add(3, "minutes").format("YYYY-MM-DD HH:mm:ss");
 			if (payments.length === 0) {
-				nextDate = moment().add(1, "minutes").format("YYYY-MM-DD HH:mm:ss");
+				nextDate = moment(subscription.startDate).add(1, "minutes").format("YYYY-MM-DD HH:mm:ss");
 			}
 		}
 		if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 6) {
 			nextDate = moment(subscription.startDate).add(6, "minutes").format("YYYY-MM-DD HH:mm:ss");
 			if (payments.length === 0) {
-				nextDate = moment().add(1, "minutes").format("YYYY-MM-DD HH:mm:ss");
+				nextDate = moment(subscription.startDate).add(1, "minutes").format("YYYY-MM-DD HH:mm:ss");
 			}
 		}
 	}
