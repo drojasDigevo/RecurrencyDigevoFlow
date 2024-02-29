@@ -28,7 +28,7 @@ exports.createNewPaymentEvent = async function (idSubscription, subscriptionOld)
 
 	let nextDate = false;
 	if (payments.length === 0) {
-		nextDate = moment().add(1, "minutes");
+		nextDate = moment(subscription.startDate).add(1, "minutes");
 	} else if (subscription.frequencyType.name == "Mensual") {
 		nextDate = moment(lastPayment.payDate).date(1).add(subscription.frequency, "months");
 		if (payments.length === 1 && subscription.frequency != 1) {
