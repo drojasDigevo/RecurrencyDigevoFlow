@@ -23,8 +23,10 @@ exports.createNewPaymentEvent = async function (idSubscription, subscriptionOld)
 			console.error(e);
 		}
 	}
-	const payments = subscription.paymentHistory.filter((payment) => payment.payStatus == "approved");
-	const lastPayment = payments.length > 0 ? payments[payments.length - 1] : false;
+	const payments = subscription.paymentHistory
+		.filter((payment) => payment.payStatus == "approved")
+		.sort((a, b) => new Date(a.payDate) - new Date(b.payDate));
+	const lastPayment = payments.length > 0 ? payments[0] : false;
 
 	let nextDate = false;
 	if (payments.length === 0) {
