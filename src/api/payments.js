@@ -25,7 +25,7 @@ exports.createNewPaymentEvent = async function (idSubscription, subscriptionOld)
 	}
 	const payments = subscription.paymentHistory
 		.filter((payment) => payment.payStatus == "approved")
-		.sort((a, b) => new Date(a.payDate) - new Date(b.payDate));
+		.sort((a, b) => new Date(b.payDate) - new Date(a.payDate));
 	const lastPayment = payments.length > 0 ? payments[0] : false;
 
 	let nextDate = false;
