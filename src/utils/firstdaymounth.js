@@ -1,6 +1,6 @@
-const moment = require("moment-timezone");
+const moment = require("moment");
 
-exports.getFirstMondayWithAddedMonths = function(date, monthsToAdd) {
+exports.getFirstMondayWithAddedMonths = function (date, monthsToAdd) {
     // Crear un objeto moment a partir de la fecha proporcionada y agregar los meses
     let startDate = moment(date).date(1).add(monthsToAdd, 'months');
 
@@ -17,7 +17,7 @@ exports.getFirstMondayWithAddedMonths = function(date, monthsToAdd) {
     return startDate.format("YYYY-MM-DD HH:mm:ss");
 }
 
-exports.getFirstMondayWithAddedDays = function(date, monthsToAdd) {
+exports.getFirstMondayWithAddedDays = function (date, monthsToAdd) {
     // Crear un objeto moment a partir de la fecha proporcionada y agregar los dias
     let startDate = moment(date).date(1).add(monthsToAdd, 'days');
 
