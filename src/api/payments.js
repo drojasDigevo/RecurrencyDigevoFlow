@@ -25,12 +25,14 @@ exports.createNewPaymentEvent = async function (idSubscription, subscriptionOld)
 			console.error(e);
 		}
 	}
-	const payments = subscription.paymentHistory.filter((payment) => payment.payStatus == "approved");
-	const lastPayment = payments.length > 0 ? payments[payments.length - 1] : false;
+	const payments = subscription.paymentHistory
+		.filter((payment) => payment.payStatus == "approved")
+		.sort((a, b) => new Date(b.payDate) - new Date(a.payDate));
+	const lastPayment = payments.length > 0 ? payments[0] : false;
 
 	let nextDate = false;
 	if (payments.length === 0) {
-		nextDate = moment().add(1, "minutes");
+		nextDate = moment(subscription.startDate).add(1, "minutes");
 	} else if (subscription.frequencyType.name == "Mensual") {
 		nextDate = getFirstMondayWithAddedMonths(lastPayment.payDate, subscription.frequency);// moment(lastPayment.payDate).date(1).add(subscription.frequency, "months");
 		if (payments.length === 1 && subscription.frequency != 1) {
