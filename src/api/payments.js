@@ -35,29 +35,15 @@ exports.createNewPaymentEvent = async function (idSubscription, subscriptionOld)
 		nextDate = moment(subscription.startDate).add(1, "minutes");
 	} else if (subscription.frequencyType.name == "Mensual") {
 		nextDate = getFirstMondayWithAddedMonths(lastPayment.payDate, subscription.frequency);
-		// moment(lastPayment.payDate).date(1).add(subscription.frequency, "months");
+		
 		if (payments.length === 1 && subscription.frequency != 1) {
 			nextDate = getFirstMondayWithAddedMonths(subscription.startDate, subscription.frequency);
-			//moment(subscription.startDate)
-				//.date(1);
-				//.add(subscription.frequency - 1, "months");
-				//.add(subscription.frequency, "months");
 		}
-		//nextDate.date(25);
 	} else if (subscription.frequencyType.name == "Semestral") {
 		nextDate = getFirstMondayWithAddedMonths(lastPayment.payDate, subscription.frequency * 6);
-		//moment(lastPayment.payDate)
-			//.date(1)
-			//.add(subscription.frequency * 6, "months");
-		//nextDate.date(25);
 	} else if (subscription.frequencyType.name == "Anual") {
 		nextDate = getFirstMondayWithAddedMonths(lastPayment.payDate, subscription.frequency * 12);
-		//moment(lastPayment.payDate)
-		//.date(1)
-		//.add(subscription.frequency, "years");
-		//nextDate.date(25);
 	}
-	//nextDate = nextDate.format("YYYY-MM-DD HH:mm:ss");
 	if (digevoSpeed == "1") {
 		// TO FIX: Esto es temporal, para acelerar el proceso de pruebas
 		if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 1) {

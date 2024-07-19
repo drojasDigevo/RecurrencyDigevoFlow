@@ -14,7 +14,9 @@ exports.getFirstMondayWithAddedMonths = function (date, monthsToAdd) {
     // Ajustar la fecha para obtener el primer lunes
     startDate.add(offset, 'days');
 
-    return startDate.format("YYYY-MM-DD HH:mm:ss");
+    startDate.format("YYYY-MM-DD HH:mm:ss");
+
+    return startDate;
 }
 
 exports.getFirstMondayWithAddedDays = function (date, monthsToAdd) {
@@ -31,5 +33,7 @@ exports.getFirstMondayWithAddedDays = function (date, monthsToAdd) {
     // Ajustar la fecha para obtener el primer lunes
     startDate.add(offset, 'days');
 
-    return startDate.format("YYYY-MM-DD HH:mm:ss");
+    startDate.format("YYYY-MM-DD HH:mm:ss");
+
+    return startDate;
 }
