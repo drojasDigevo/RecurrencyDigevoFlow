@@ -10,7 +10,7 @@ exports.getFirstMondayWithAddedMonths = function (date, monthsToAdd) {
 
     if (hour < 6) 
         { 
-            hour.add(6 - hour, 'hours'); // Desplazar a las 6 AM 
+            hour = 6 - hour; // Desplazar a las 6 AM 
         } 
 
     // Establecer el día al primer día del mes, manteniendo la hora
@@ -38,7 +38,7 @@ exports.getFirstMondayWithAddedDays = function (date, monthsToAdd) {
 
     if (hour < 6) 
     { 
-        hour.add(6 - hour, 'hours'); // Desplazar a las 6 AM 
+        hour = 6 - hour; 
     } 
 
     // Establecer el día al primer día del mes, manteniendo la hora
