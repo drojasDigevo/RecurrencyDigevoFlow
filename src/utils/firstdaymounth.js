@@ -31,6 +31,11 @@ exports.getFirstMondayWithAddedDays = function (date, monthsToAdd) {
     let minute = startDate.minute();
     let second = startDate.second();
 
+    if (hour < 6) 
+        { 
+            hour.add(6 - hour, 'hours'); // Desplazar a las 6 AM 
+        } 
+
     // Establecer el día al primer día del mes, manteniendo la hora
     startDate.startOf('month').hour(hour).minute(minute).second(second);
 
