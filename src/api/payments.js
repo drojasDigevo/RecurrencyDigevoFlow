@@ -5,6 +5,8 @@ const { createInfoLog } = require("../service/logs");
 const { verifySubscriptionStatus } = require("../service/subscriptions");
 const InstanceAPI = require("../utils/axios");
 const { findOneByCode } = require("../utils/mongodb");
+const {getFirstMondayWithAddedMonths} = require("../utils/firstdaymounth");
+const {getFirstMondayWithAddedDays} = require("../utils/firstdaymounth");
 const { CONFIG_CODES } = require("../utils/constants");
 
 const URL_API = process.env.PAYMENTS_URL_API || "https://api.digevopayments.com/api";
@@ -32,23 +34,16 @@ exports.createNewPaymentEvent = async function (idSubscription, subscriptionOld)
 	if (payments.length === 0) {
 		nextDate = moment(subscription.startDate).add(1, "minutes");
 	} else if (subscription.frequencyType.name == "Mensual") {
-		nextDate = moment(lastPayment.payDate).date(1).add(subscription.frequency, "months");
+		nextDate = getFirstMondayWithAddedMonths(lastPayment.payDate, subscription.frequency);
+		
 		if (payments.length === 1 && subscription.frequency != 1) {
-			nextDate = moment(subscription.startDate)
-				.date(1)
-				.add(subscription.frequency - 1, "months");
+			nextDate = getFirstMondayWithAddedMonths(subscription.startDate, subscription.frequency);
 		}
-		nextDate.date(25);
 	} else if (subscription.frequencyType.name == "Semestral") {
-		nextDate = moment(lastPayment.payDate)
-			.date(1)
-			.add(subscription.frequency * 6, "months");
-		nextDate.date(25);
+		nextDate = getFirstMondayWithAddedMonths(lastPayment.payDate, subscription.frequency * 6);
 	} else if (subscription.frequencyType.name == "Anual") {
-		nextDate = moment(lastPayment.payDate).date(1).add(subscription.frequency, "years");
-		nextDate.date(25);
+		nextDate = getFirstMondayWithAddedMonths(lastPayment.payDate, subscription.frequency * 12);
 	}
-	nextDate = nextDate.format("YYYY-MM-DD HH:mm:ss");
 	if (digevoSpeed == "1") {
 		// TO FIX: Esto es temporal, para acelerar el proceso de pruebas
 		if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 1) {
@@ -84,7 +79,8 @@ exports.createNewPaymentEvent = async function (idSubscription, subscriptionOld)
 		await createInfoLog(idSubscription, "Se creó evento de pago", { nextDate, totalIterations, payments });
 	} else {
 		const { value: renewalDays } = await findOneByCode(CONFIG_CODES.RENEWAL_DAYS);
-		let renewalDate = moment(nextDate).add(-parseInt(renewalDays), "days").format("YYYY-MM-DD HH:mm:ss");
+		//let renewalDate = moment(nextDate).add(-parseInt(renewalDays), "days").format("YYYY-MM-DD HH:mm:ss");
+		let renewalDate = getFirstMondayWithAddedDays(nextDate, -parseInt(renewalDays));
 		if (digevoSpeed == "1") {
 			// TO FIX: Esto es temporal, para acelerar el proceso de pruebas
 			if (subscription.frequencyType.name == "Mensual" && subscription.frequency == 1) {

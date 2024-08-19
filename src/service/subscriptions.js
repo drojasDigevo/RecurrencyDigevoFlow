@@ -77,8 +77,7 @@ exports.createInitialEvents = async function (idSubscription) {
 		const subscription = await exports.loadSubscriptionFromAPI(idSubscription);
 		if (subscription) {
 			await createNewPaymentEvent(idSubscription, subscription);
-			// TODO: Se comenta temporalmente para invocar desde un pago exitoso
-			//const { _id: eventShipmentId } = await createEvent(EventType.SHIPMENT_DISPATCHED, { idSubscription }, nextDate)
+			// TODO: Se comenta temporalmente para invocar desde un pago exitoso			
 			await createSuccessLog(idSubscription, "Se crearon eventos iniciales");
 		} else {
 			await createErrorLog(idSubscription, "No se pudo crear eventos iniciales");
